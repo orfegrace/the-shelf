@@ -1172,7 +1172,7 @@
       font-size: .78rem;
       padding: 40px 0;
     }
-    .genre-list { display: flex; flex-direction: column; gap: 10px; }
+    .genre-list { display: flex; flex-direction: column; justify-content: space-evenly; flex: 1; }
     .genre-row { display: flex; align-items: center; gap: 9px; }
     .genre-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
     .genre-name { font-size: .8rem; font-weight: 600; color: var(--text); width: 80px; flex-shrink: 0; }
@@ -1430,7 +1430,7 @@
   <div id="vDashboard" class="view">
     <div class="stats-grid" id="statsGrid"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px">
-      <div class="chart-card">
+      <div class="chart-card" style="display:flex;flex-direction:column">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
           <div class="chart-card-title" style="margin-bottom:0">Genre Breakdown</div>
           <div class="genre-view-btns">
@@ -1442,7 +1442,7 @@
             </button>
           </div>
         </div>
-        <div id="genreChartArea"></div>
+        <div id="genreChartArea" style="flex:1;display:flex;flex-direction:column"></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px">
         <div class="chart-card" id="mvbCard"></div>
