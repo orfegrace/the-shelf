@@ -10,7 +10,7 @@ A personal tracker I built to keep my books and movies in one place. You can log
 <img width="1440" height="715" alt="Screenshot 2026-06-14 at 10 49 35 AM" src="https://github.com/user-attachments/assets/65c6fb65-66fd-4b15-9345-1d31c51e7c4e" />
 
 ### Library — Board View
-<img width="1440" height="718" alt="Screenshot 2026-06-14 at 11 09 16 AM" src="https://github.com/user-attachments/assets/d4128bdf-5b25-4b09-bad4-0922cfb290ab" />
+<img width="1440" height="744" alt="Screenshot 2026-06-14 at 11 18 18 AM" src="https://github.com/user-attachments/assets/bfc5800b-9752-4fe4-aba1-d92567306c81" />
 
 ### Library - Adding an Entry
 <img width="1440" height="715" alt="Screenshot 2026-06-14 at 11 10 20 AM" src="https://github.com/user-attachments/assets/fb950260-b9dc-4b1a-8dab-fdbea0d56585" />
