@@ -1,4 +1,4 @@
-# The Shelf 📚🏠
+# The Shelf
 
 A personal tracker I built to keep my books and movies in one place. You can log entries, rate them, add notes, and view your library in a bunch of different ways.
 
@@ -7,11 +7,10 @@ A personal tracker I built to keep my books and movies in one place. You can log
 ## Screenshots of the website
 
 ### Library — Gallery View
-<img width="1431" height="713" alt="Screenshot 2026-06-13 at 11 29 24 PM" src="https://github.com/user-attachments/assets/49d25e8b-1f5b-4559-a676-636eca2c5b11" />
+<img width="1440" height="715" alt="Screenshot 2026-06-14 at 10 49 35 AM" src="https://github.com/user-attachments/assets/65c6fb65-66fd-4b15-9345-1d31c51e7c4e" />
 
 ### Library — Board View
 <img width="1440" height="715" alt="Screenshot 2026-06-13 at 11 29 52 PM" src="https://github.com/user-attachments/assets/5e461ddb-cca8-4424-ae57-a2576dfe58a6" />
-
 
 ### Library - Stats
 <img width="1440" height="714" alt="Screenshot 2026-06-13 at 11 49 26 PM" src="https://github.com/user-attachments/assets/44348f9d-5992-43b3-8b87-295094421054" />
@@ -76,11 +75,38 @@ No build step needed — just open `index.html` in your browser. Or deploy to Gi
 
 ## Project structure
 
-Everything lives in a single index.html file. 
-The top bar lets you navigate between three pages — Library, Stats, and Favorites. 
-The Library has a search bar and 
-five view options: gallery, table, timeline, board, and list. 
-The right sidebar is for profile editing. 
+## Project Structure
+
+Everything is built inside a single `index.html` file.
+
+```text id="11ekfq"
+index.html
+├── Top Navigation Bar
+│   ├── Library
+│   ├── Stats
+│   └── Favorites
+│
+├── Library Page
+│   ├── Search Bar
+│   └── View Options
+│       ├── Gallery View
+│       ├── Table View
+│       ├── Timeline View
+│       ├── Board View
+│       │   ├── Rating
+│       │   ├── Genre
+│       │   └── Year Added
+│       └── List View
+│
+├── Stats Page
+│   └── Displays collection-related statistics
+│
+├── Favorites Page
+│   └── Shows saved or favorited items
+│
+└── Right Sidebar
+    └── Profile Editing Panel
+```
 
 ---
 
