@@ -10,11 +10,16 @@ A personal tracker I built to keep my books and movies in one place. You can log
 <img width="1440" height="715" alt="Screenshot 2026-06-14 at 10 49 35 AM" src="https://github.com/user-attachments/assets/65c6fb65-66fd-4b15-9345-1d31c51e7c4e" />
 
 ### Library — Board View
-<img width="1440" height="715" alt="Screenshot 2026-06-13 at 11 29 52 PM" src="https://github.com/user-attachments/assets/5e461ddb-cca8-4424-ae57-a2576dfe58a6" />
+<img width="1440" height="718" alt="Screenshot 2026-06-14 at 11 09 16 AM" src="https://github.com/user-attachments/assets/d4128bdf-5b25-4b09-bad4-0922cfb290ab" />
 
-### Library - Stats
+### Library - Adding an Entry
+<img width="1440" height="715" alt="Screenshot 2026-06-14 at 11 10 20 AM" src="https://github.com/user-attachments/assets/fb950260-b9dc-4b1a-8dab-fdbea0d56585" />
+
+### Library - Entry card view
+<img width="1440" height="711" alt="Screenshot 2026-06-14 at 11 09 40 AM" src="https://github.com/user-attachments/assets/696bd05d-670f-4145-95be-a8c56981ab55" />
+
+### Stats
 <img width="1440" height="714" alt="Screenshot 2026-06-13 at 11 49 26 PM" src="https://github.com/user-attachments/assets/44348f9d-5992-43b3-8b87-295094421054" />
-
 
 ### Favorites
 <img width="1440" height="709" alt="Screenshot 2026-06-13 at 11 31 02 PM" src="https://github.com/user-attachments/assets/88373572-9dbf-473d-a7a8-124a2d48e97c" />
