@@ -1172,7 +1172,13 @@
       font-size: .78rem;
       padding: 40px 0;
     }
-    .genre-list { display: flex; flex-direction: column; justify-content: space-evenly; flex: 1; }
+    .genre-list { display: flex; flex-direction: column; justify-content: space-evenly; height: 100%; }
+    .status-row { border-radius: 8px; padding: 5px 7px; transition: background .2s; cursor: default; }
+    .status-row:hover { background: rgba(0,0,0,.035); }
+    .status-bar-fill { transform-origin: left center; transition: transform .35s ease, filter .35s ease; }
+    .status-row:hover .status-bar-fill { transform: scaleX(1.04); filter: brightness(1.08); }
+    .status-count { transition: color .2s; }
+    .status-row:hover .status-count { color: var(--text) !important; font-weight: 800 !important; }
     .genre-row { display: flex; align-items: center; gap: 9px; }
     .genre-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
     .genre-name { font-size: .8rem; font-weight: 600; color: var(--text); width: 80px; flex-shrink: 0; }
@@ -1457,15 +1463,15 @@
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
           <div class="chart-card-title" style="margin-bottom:0">Genre Breakdown</div>
           <div class="genre-view-btns">
-            <button class="genre-view-btn ${genreView === 'list' ? 'active' : ''}" id="genreViewList" title="List">
+            <button class="genre-view-btn" id="genreViewList" title="List">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="16" y2="12"/><line x1="3" y1="18" x2="10" y2="18"/></svg>
             </button>
-            <button class="genre-view-btn ${genreView === 'chart' ? 'active' : ''}" id="genreViewChart" title="Pie chart">
+            <button class="genre-view-btn active" id="genreViewChart" title="Pie chart">
               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
             </button>
           </div>
         </div>
-        <div id="genreChartArea" style="flex:1;display:flex;flex-direction:column"></div>
+        <div id="genreChartArea" style="flex:1;min-height:0;position:relative"></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px">
         <div class="chart-card" id="mvbCard"></div>
@@ -1634,7 +1640,7 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 const _charts = {};
 function _destroyChart(k) { if (_charts[k]) { _charts[k].destroy(); delete _charts[k]; } }
 
-let genreView = 'list';
+let genreView = 'chart';
 
 // State
 const S = {
@@ -2142,13 +2148,13 @@ function renderDashboard() {
     ${statusCounts.length ? `
       <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
         ${statusCounts.map(s => `
-          <div>
+          <div class="status-row">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
               <span style="font-size:.82rem;font-weight:600;color:var(--text)">${s.label}</span>
-              <span style="font-size:.75rem;font-weight:700;color:var(--muted)">${s.count}</span>
+              <span class="status-count" style="font-size:.75rem;font-weight:700;color:var(--muted)">${s.count}</span>
             </div>
             <div style="height:7px;border-radius:var(--pill);background:var(--bg);overflow:hidden">
-              <div style="height:100%;width:${Math.round((s.count/maxStatus)*100)}%;background:${s.color};border-radius:var(--pill);transition:width .8s ease"></div>
+              <div class="status-bar-fill" style="height:100%;width:${Math.round((s.count/maxStatus)*100)}%;background:${s.color};border-radius:var(--pill);transition:width .8s ease"></div>
             </div>
           </div>
         `).join('')}
@@ -2243,6 +2249,7 @@ function renderDashboard() {
         }],
         options: {
           responsive: true,
+          maintainAspectRatio: false,
           animation: { animateRotate: true, duration: 900, easing: 'easeOutQuart' },
           plugins: {
             legend: { position: 'bottom', align: 'start', labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' }, padding: 10, boxWidth: 10, boxHeight: 10, color: '#000000' } },
@@ -2685,8 +2692,9 @@ async function showApp(user) {
     }
   }
 
-  const v = localStorage.getItem('mt_view');
-  if (v) { S.view = v; document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.v === v)); updateViewToggleLabel(v); }
+  S.view = 'gallery';
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.v === 'gallery'));
+  updateViewToggleLabel('gallery');
   renderLibrary();
   renderDashboard();
 }
