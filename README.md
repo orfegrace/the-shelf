@@ -50,7 +50,7 @@ A personal tracker I built to keep my books and movies in one place. You can log
 | Auth | [Supabase](https://supabase.com) |
 | Charts | [Chart.js v4](https://www.chartjs.org/) |
 | Fonts | Baloo 2 + Plus Jakarta Sans |
-| Storage | `localStorage` (per user ID) |
+| Database | [Supabase](https://supabase.com) (entries synced per user) |
 
 ---
 
@@ -65,14 +65,43 @@ cd the-shelf
 
 ### 2. Add your Supabase credentials
 
-Create a project at [supabase.com](https://supabase.com), then open `index.html` and replace these two lines near the bottom:
+Create a project at [supabase.com](https://supabase.com), then open `index.html` and replace these two lines near the top of the script:
 
 ```js
 const SUPABASE_URL = 'YOUR_SUPABASE_PROJECT_URL';
 const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY';
 ```
 
-### 3. Open it
+### 3. Create the database table
+
+In your Supabase dashboard, go to **SQL Editor** and run:
+
+```sql
+create table public.entries (
+  id uuid primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  type text not null,
+  title text not null,
+  year integer,
+  creator text,
+  genre text,
+  status text default 'done',
+  date text,
+  rating integer,
+  cover text,
+  notes text,
+  added_at bigint
+);
+
+alter table public.entries enable row level security;
+
+create policy "Users can manage their own entries"
+  on public.entries for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+```
+
+### 4. Open it
 
 No build step needed — just open `index.html` in your browser. Or deploy to GitHub Pages, Vercel, or Netlify.
 
@@ -114,10 +143,6 @@ index.html
 ```
 
 ---
-
-## Note on data
-
-Entry data lives in `localStorage` under your Supabase user ID — nothing gets saved to the database itself. Supabase only handles login. If you clear your browser storage, your entries will be gone.
 
 ---
 
