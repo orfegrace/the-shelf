@@ -1,4 +1,4 @@
-<img width="1440" height="709" alt="Screenshot 2026-06-13 at 11 31 02 PM" src="https://github.com/user-attachments/assets/d6632da3-bd0a-49a6-83a8-3e31b0317187" /># 📚 The Shelf
+<img width="1440" height="709" alt="Screenshot 2026-06-13 at 11 31 02 PM" src="https://github.com/user-attachments/assets/d6632da3-bd0a-49a6-83a8-3e31b0317187" /># The Shelf 📚🏠
 
 A personal tracker I built to keep my books and movies in one place. You can log entries, rate them, add notes, and view your library in a bunch of different ways.
 
