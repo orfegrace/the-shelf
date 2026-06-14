@@ -678,32 +678,42 @@
       font-size: .9rem;
       line-height: 1.6;
     }
-    .det-actions { display: flex; gap: 10px; }
-    .btn-edit {
-      flex: 1;
-      padding: 9px;
-      border-radius: var(--pill);
-      border: 2px solid var(--amber);
-      background: var(--amber-lt);
-      color: var(--text);
-      font-family: inherit;
-      font-weight: 700;
+    .det-menu { position: absolute; top: 12px; right: 54px; z-index: 10; }
+    .det-menu-btn {
+      width: 34px; height: 34px;
+      border-radius: 50%; border: none;
+      background: rgba(255,255,255,0.18);
       cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
       transition: all .2s;
     }
-    .btn-edit:hover { background: var(--amber); color: #fff; }
-    .btn-delete {
-      padding: 9px 18px;
-      border-radius: var(--pill);
-      border: 2px solid var(--rose);
+    .det-menu-btn:hover { background: var(--bg); color: var(--text); }
+    .det-dropdown {
+      position: absolute;
+      top: calc(100% + 6px); right: 0;
       background: var(--surface);
-      color: var(--rose);
-      font-family: inherit;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all .2s;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 4px 4px 0 var(--border);
+      min-width: 140px;
+      overflow: hidden;
+      display: none;
+      z-index: 20;
     }
-    .btn-delete:hover { background: var(--rose-lt); }
+    .det-dropdown.open { display: block; }
+    .det-dd-btn {
+      width: 100%; padding: 9px 14px;
+      border: none; background: transparent;
+      font-family: inherit; font-size: .82rem; font-weight: 600;
+      color: var(--text); cursor: pointer;
+      text-align: left;
+      display: flex; align-items: center; gap: 9px;
+      transition: background .12s;
+    }
+    .det-dd-btn:hover { background: var(--amber-lt); }
+    .det-dd-btn.danger { color: var(--rose); }
+    .det-dd-btn.danger:hover { background: var(--rose-lt); }
 
     /* Toast */
     .toast {
@@ -866,71 +876,87 @@
     .tbl-meta  { font-size: .78rem; color: var(--muted); margin-top: 2px; }
 
     /* Timeline view */
-    .timeline { position: relative; padding-left: 40px; }
+    .timeline { position: relative; padding-left: 38px; }
     .timeline::before {
       content: '';
       position: absolute;
-      left: 12px; top: 6px; bottom: 6px;
-      width: 2px;
-      background: var(--border);
+      left: 13px; top: 0; bottom: 0;
+      width: 3px;
+      background: linear-gradient(to bottom, var(--amber-lt), var(--amber) 25%, var(--rose) 65%, var(--amber-lt));
+      border-radius: 3px;
+      opacity: .7;
     }
-    .tl-group { margin-bottom: 32px; }
-    .tl-date {
+    .tl-group { margin-bottom: 40px; }
+    .tl-month-node {
       position: relative;
-      font-size: .72rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-      color: var(--muted);
-      margin-bottom: 14px;
+      margin-bottom: 16px;
       display: flex;
       align-items: center;
     }
-    .tl-date::before {
+    .tl-month-node::before {
       content: '';
       position: absolute;
-      left: -34px;
+      left: -31px;
       top: 50%; transform: translateY(-50%);
-      width: 12px; height: 12px;
+      width: 18px; height: 18px;
       border-radius: 50%;
-      background: var(--amber);
-      border: 2px solid var(--bg);
-      box-shadow: 0 0 0 2px var(--amber-lt);
+      background: linear-gradient(135deg, var(--amber), var(--rose));
+      border: 3px solid var(--bg);
+      box-shadow: 0 0 0 2px var(--amber);
     }
-    .tl-cards { display: flex; flex-direction: column; gap: 10px; }
+    .tl-month-inner { display: flex; align-items: baseline; gap: 8px; }
+    .tl-month-name {
+      font-family: 'Baloo 2', sans-serif;
+      font-size: 1.2rem; font-weight: 800; color: var(--text);
+    }
+    .tl-month-year {
+      font-size: .68rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--amber);
+      background: var(--amber-lt); padding: 2px 8px; border-radius: var(--pill);
+    }
+    .tl-cards { display: flex; flex-direction: column; gap: 12px; }
     .tl-card {
       display: flex;
-      align-items: flex-start;
-      gap: 14px;
+      align-items: stretch;
       background: var(--surface);
-      border-radius: var(--r-sm);
-      padding: 12px 16px;
+      border-radius: var(--r);
+      overflow: hidden;
       box-shadow: var(--shadow);
       cursor: pointer;
       transition: transform .2s, box-shadow .2s;
+      position: relative;
     }
-    .tl-card:hover { transform: translateX(4px); box-shadow: var(--shadow-h); }
-    .tl-thumb {
-      width: 44px; height: 66px;
-      border-radius: 6px;
-      object-fit: cover;
-      flex-shrink: 0;
+    .tl-card::before {
+      content: '';
+      position: absolute;
+      left: -24px; top: 50%; transform: translateY(-50%);
+      width: 12px; height: 2px;
+      background: var(--border);
     }
-    .tl-thumb-ph {
-      width: 44px; height: 66px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .5rem;
-      font-weight: 700;
-      letter-spacing: .12em;
-      text-transform: uppercase;
-      color: var(--muted);
-      flex-shrink: 0;
+    .tl-card:hover { transform: translateX(5px); box-shadow: var(--shadow-h); }
+    .tl-card.movie { border-left: 4px solid var(--amber); }
+    .tl-card.book  { border-left: 4px solid var(--sage); }
+    .tl-cover { width: 76px; flex-shrink: 0; }
+    .tl-cover-img { width: 76px; height: 100%; min-height: 112px; object-fit: cover; display: block; }
+    .tl-cover-ph {
+      width: 76px; min-height: 112px; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .45rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted);
     }
-    .tl-thumb-ph.movie { background: linear-gradient(160deg, var(--amber-lt), var(--honey)); }
-    .tl-thumb-ph.book  { background: linear-gradient(160deg, var(--sage-lt), #dfeedd); }
+    .tl-cover-ph.movie { background: linear-gradient(160deg, var(--amber-lt), var(--honey)); }
+    .tl-cover-ph.book  { background: linear-gradient(160deg, var(--sage-lt), #dfeedd); }
+    .tl-content {
+      flex: 1; min-width: 0;
+      padding: 12px 14px;
+      display: flex; flex-direction: column; gap: 4px;
+    }
+    .tl-title { font-weight: 700; font-size: .97rem; line-height: 1.35; color: var(--text); }
+    .tl-meta  { font-size: .78rem; color: var(--muted); font-weight: 600; }
+    .tl-bottom {
+      display: flex; align-items: center; gap: 5px;
+      flex-wrap: wrap; margin-top: auto; padding-top: 6px;
+    }
 
     /* Board view */
     .board {
@@ -1735,30 +1761,37 @@ function renderTimeline() {
   const list = getFiltered();
   if (!list.length) { vc.innerHTML = emptyHTML(); return; }
 
-  // Sort by date newest-first for timeline
   const sorted = [...list].sort((a, b) => {
     const da = a.date ? new Date(a.date + 'T00:00:00').getTime() : a.addedAt;
     const db = b.date ? new Date(b.date + 'T00:00:00').getTime() : b.addedAt;
     return db - da;
   });
 
-  // Group by Month Year
   const groups = new Map();
   sorted.forEach(e => {
-    let label;
+    let month, year;
     if (e.date) {
       const [yr, mo] = e.date.split('-');
-      label = new Date(+yr, +mo - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      month = new Date(+yr, +mo - 1, 1).toLocaleDateString('en-US', { month: 'long' });
+      year  = yr;
     } else {
-      label = new Date(e.addedAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+      const d = new Date(e.addedAt);
+      month = d.toLocaleDateString('en-US', { month: 'long' });
+      year  = d.getFullYear();
     }
-    if (!groups.has(label)) groups.set(label, []);
-    groups.get(label).push(e);
+    const key = `${month} ${year}`;
+    if (!groups.has(key)) groups.set(key, { month, year, entries: [] });
+    groups.get(key).entries.push(e);
   });
 
-  const tlHTML = [...groups.entries()].map(([date, entries]) => `
+  const tlHTML = [...groups.values()].map(({ month, year, entries }) => `
     <div class="tl-group">
-      <div class="tl-date">${date}</div>
+      <div class="tl-month-node">
+        <div class="tl-month-inner">
+          <span class="tl-month-name">${month}</span>
+          <span class="tl-month-year">${year}</span>
+        </div>
+      </div>
       <div class="tl-cards">${entries.map(tlCardHTML).join('')}</div>
     </div>
   `).join('');
@@ -1768,22 +1801,23 @@ function renderTimeline() {
 }
 
 function tlCardHTML(e) {
-  const ph    = `tl-thumb-ph ${e.type}`;
-  const label = e.type === 'movie' ? 'Film' : 'Book';
-  const thumb = e.cover
-    ? `<img class="tl-thumb" src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'${ph}',textContent:'${label}'}))"/>`
-    : `<div class="${ph}">${label}</div>`;
-  return `<div class="tl-card" data-id="${e.id}">
-    ${thumb}
-    <div style="flex:1;min-width:0">
-      <div class="card-title" style="margin-bottom:3px">${e.title}</div>
-      <div class="card-meta">${[e.creator, e.year].filter(Boolean).join(' · ')}</div>
-      <div class="badges" style="margin-top:7px">
-        <span class="badge ${e.type === 'movie' ? 'b-movie' : 'b-book'}">${e.type === 'movie' ? 'Movie' : 'Book'}</span>
+  const isMovie = e.type === 'movie';
+  const label   = isMovie ? 'Film' : 'Book';
+  const phCls   = `tl-cover-ph ${e.type}`;
+  const thumb   = e.cover
+    ? `<img class="tl-cover-img" src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'${phCls}',textContent:'${label}'}))"/>`
+    : `<div class="${phCls}">${label}</div>`;
+  return `<div class="tl-card ${e.type}" data-id="${e.id}">
+    <div class="tl-cover">${thumb}</div>
+    <div class="tl-content">
+      <div><span class="badge ${isMovie ? 'b-movie' : 'b-book'}">${isMovie ? 'Movie' : 'Book'}</span></div>
+      <div class="tl-title">${e.title}</div>
+      ${(e.creator || e.year) ? `<div class="tl-meta">${[e.creator, e.year].filter(Boolean).join(' · ')}</div>` : ''}
+      <div class="tl-bottom">
         ${statusBadge(e)}
         ${e.genre ? `<span class="badge b-genre">${e.genre}</span>` : ''}
+        ${e.rating ? starsHTML(e.rating) : ''}
       </div>
-      ${e.rating ? `<div style="margin-top:5px">${starsHTML(e.rating)}</div>` : ''}
     </div>
   </div>`;
 }
@@ -2213,6 +2247,21 @@ function openDetail(id) {
   const fmtDate = d => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   document.getElementById('detContent').innerHTML = `
+    <div class="det-menu" id="detMenu">
+      <button class="det-menu-btn" id="detMenuBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+      </button>
+      <div class="det-dropdown" id="detDropdown">
+        <button class="det-dd-btn" id="dEdit">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+        <button class="det-dd-btn danger" id="dDel">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+          Delete
+        </button>
+      </div>
+    </div>
     <button class="close-btn" id="closeDet" style="position:absolute;top:12px;right:12px;z-index:10;background:rgba(255,255,255,0.18)">✕</button>
     ${thumbHTML(e, false)}
     <div class="det-body">
@@ -2224,18 +2273,21 @@ function openDetail(id) {
       <div class="det-title">${e.title}</div>
       ${e.creator ? `<div class="det-meta">${cl}: <strong>${e.creator}</strong></div>` : ''}
       ${e.year    ? `<div class="det-meta">Year: <strong>${e.year}</strong></div>` : ''}
-      ${e.rating  ? starsHTML(e.rating, '1.35rem') : ''}
       ${e.date    ? `<div class="det-meta">Date: <strong>${fmtDate(e.date)}</strong></div>` : ''}
+      ${e.rating  ? starsHTML(e.rating, '1.35rem') : ''}
       ${e.notes   ? `<div class="det-notes">${e.notes}</div>` : ''}
-      <div class="det-actions">
-        <button class="btn-edit"   id="dEdit">Edit</button>
-        <button class="btn-delete" id="dDel">Delete</button>
-      </div>
     </div>
   `;
   document.getElementById('detOverlay').classList.add('open');
 
   document.getElementById('closeDet').onclick = () => document.getElementById('detOverlay').classList.remove('open');
+  document.getElementById('detMenuBtn').onclick = ev => {
+    ev.stopPropagation();
+    document.getElementById('detDropdown').classList.toggle('open');
+  };
+  document.getElementById('detContent').addEventListener('click', () => {
+    document.getElementById('detDropdown')?.classList.remove('open');
+  });
   document.getElementById('dEdit').onclick = () => {
     document.getElementById('detOverlay').classList.remove('open');
     openAdd(id);
