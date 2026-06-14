@@ -497,8 +497,36 @@
     .stat-val   { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2rem; font-weight: 700; }
     .stat-label { font-size: .82rem; font-weight: 600; color: var(--muted); margin-top: auto; }
     .sec-title  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; }
-    .dash-recent { display: flex; flex-direction: column; min-height: calc(100vh - 320px); }
-    .dash-recent #recentGrid { flex: 1; position: relative; }
+    .dash-recent { display: flex; flex-direction: column; }
+    .recent-strip {
+      display: flex; gap: 12px;
+      overflow-x: auto; padding-bottom: 10px;
+      scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+    }
+    .recent-strip::-webkit-scrollbar { height: 5px; }
+    .recent-strip::-webkit-scrollbar-track { background: transparent; }
+    .recent-strip::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+    .recent-chip {
+      flex-shrink: 0; width: 100px;
+      background: var(--surface);
+      border-radius: var(--r-sm);
+      box-shadow: var(--shadow);
+      overflow: hidden; cursor: pointer;
+      transition: transform .2s, box-shadow .2s;
+    }
+    .recent-chip:hover { transform: translate(-2px,-2px); box-shadow: var(--shadow-h); }
+    .recent-chip-thumb { width: 100%; aspect-ratio: 2/3; object-fit: cover; display: block; }
+    .recent-chip-ph {
+      width: 100%; aspect-ratio: 2/3;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .4rem; font-weight: 700; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .recent-chip-ph.movie { background: linear-gradient(160deg, var(--amber-lt), var(--honey)); }
+    .recent-chip-ph.book  { background: linear-gradient(160deg, var(--sage-lt), #dfeedd); }
+    .recent-chip-body { padding: 7px 8px; }
+    .recent-chip-title { font-weight: 700; font-size: .72rem; line-height: 1.3; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .recent-chip-stars { margin-top: 3px; }
 
     /* Modal overlay */
     .overlay {
@@ -1144,6 +1172,23 @@
       font-size: .78rem;
       padding: 40px 0;
     }
+    .genre-list { display: flex; flex-direction: column; gap: 10px; }
+    .genre-row { display: flex; align-items: center; gap: 9px; }
+    .genre-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+    .genre-name { font-size: .8rem; font-weight: 600; color: var(--text); width: 80px; flex-shrink: 0; }
+    .genre-bar-wrap { flex: 1; height: 7px; background: var(--bg); border-radius: 99px; overflow: hidden; }
+    .genre-bar { height: 100%; border-radius: 99px; transition: width .8s ease; opacity: .85; }
+    .genre-count { font-size: .72rem; font-weight: 700; color: var(--muted); min-width: 18px; text-align: right; }
+    .genre-view-btns { display: flex; gap: 2px; background: var(--bg); border-radius: 6px; padding: 2px; }
+    .genre-view-btn {
+      width: 22px; height: 22px;
+      display: flex; align-items: center; justify-content: center;
+      border: none; border-radius: 4px;
+      background: transparent; color: var(--border);
+      cursor: pointer; transition: all .15s;
+    }
+    .genre-view-btn:hover { color: var(--muted); }
+    .genre-view-btn.active { background: var(--surface); color: var(--amber); box-shadow: 0 1px 3px rgba(0,0,0,.1); }
 
     @media (max-width: 580px) {
       .row2  { grid-template-columns: 1fr; }
@@ -1386,8 +1431,18 @@
     <div class="stats-grid" id="statsGrid"></div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px">
       <div class="chart-card">
-        <div class="chart-card-title">Genre Breakdown</div>
-        <div id="genreChartArea"><canvas id="genreChart"></canvas></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+          <div class="chart-card-title" style="margin-bottom:0">Genre Breakdown</div>
+          <div class="genre-view-btns">
+            <button class="genre-view-btn ${genreView === 'list' ? 'active' : ''}" id="genreViewList" title="List">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="16" y2="12"/><line x1="3" y1="18" x2="10" y2="18"/></svg>
+            </button>
+            <button class="genre-view-btn ${genreView === 'chart' ? 'active' : ''}" id="genreViewChart" title="Pie chart">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div id="genreChartArea"></div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px">
         <div class="chart-card" id="mvbCard"></div>
@@ -1397,7 +1452,7 @@
     </div>
     <div class="dash-recent">
       <div class="sec-title">Recently Added</div>
-      <div class="grid" id="recentGrid"></div>
+      <div id="recentGrid"></div>
     </div>
   </div>
 
@@ -1555,6 +1610,8 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 // Chart instances
 const _charts = {};
 function _destroyChart(k) { if (_charts[k]) { _charts[k].destroy(); delete _charts[k]; } }
+
+let genreView = 'list';
 
 // State
 const S = {
@@ -2066,72 +2123,84 @@ function renderDashboard() {
     requestAnimationFrame(step);
   });
 
-  const recent = [...es].sort((a, b) => b.addedAt - a.addedAt).slice(0, 10);
+  const recent = [...es].sort((a, b) => b.addedAt - a.addedAt).slice(0, 8);
   const rGrid  = document.getElementById('recentGrid');
   if (!recent.length) {
-    rGrid.innerHTML = `<div class="empty"><h3>Nothing added yet</h3></div>`;
+    rGrid.innerHTML = `<div class="empty" style="position:relative;padding:24px 0"><h3>Nothing added yet</h3></div>`;
     return;
   }
-  rGrid.innerHTML = recent.map(e => `
-    <div class="card" data-id="${e.id}">
-      ${thumbHTML(e, true)}
-      <div class="card-body">
-        <div class="badges">
-          <span class="badge ${e.type === 'movie' ? 'b-movie' : 'b-book'}">${e.type === 'movie' ? 'Movie' : 'Book'}</span>
-          ${statusBadge(e)}
-        </div>
-        <div class="card-title">${e.title}</div>
-        <div class="card-meta">${[e.creator, e.year].filter(Boolean).join(' · ')}</div>
-        ${e.rating ? starsHTML(e.rating) : ''}
+  rGrid.innerHTML = `<div class="recent-strip">${recent.map(e => {
+    const label = e.type === 'movie' ? 'Film' : 'Book';
+    const phCls = `recent-chip-ph ${e.type}`;
+    const thumb = e.cover
+      ? `<img class="recent-chip-thumb" src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'${phCls}',textContent:'${label}'}))"/>`
+      : `<div class="${phCls}">${label}</div>`;
+    return `<div class="recent-chip" data-id="${e.id}">
+      ${thumb}
+      <div class="recent-chip-body">
+        <div class="recent-chip-title">${e.title}</div>
+        ${e.rating ? `<div class="recent-chip-stars">${starsHTML(e.rating, '.65rem')}</div>` : ''}
       </div>
-    </div>
-  `).join('');
-  rGrid.querySelectorAll('.card').forEach(c => c.addEventListener('click', () => openDetail(c.dataset.id)));
+    </div>`;
+  }).join('')}</div>`;
+  rGrid.querySelectorAll('.recent-chip').forEach(c => c.addEventListener('click', () => openDetail(c.dataset.id)));
 
   // Charts
-  _destroyChart('genre');
+  const palette  = ['#f0c4a0','#b8d9b4','#f2bab4','#f2dca0','#b8ccf0','#d8b8e8','#aacec8','#f5c898','#c4daa8','#f2b4ac','#ecd498','#afc8e0'];
+  const gEntries = Object.entries(gc).sort((a, b) => b[1] - a[1]);
 
-  const palette = ['#f0c4a0','#b8d9b4','#f2bab4','#f2dca0','#b8ccf0','#d8b8e8','#aacec8','#f5c898','#c4daa8','#f2b4ac','#ecd498','#afc8e0'];
-  const surface = '#fffdf8';
+  function renderGenreArea() {
+    _destroyChart('genre');
+    const genreArea = document.getElementById('genreChartArea');
+    if (!genreArea) return;
+    const btn = document.getElementById('genreViewToggle');
 
-  const genreArea = document.getElementById('genreChartArea');
-  const gEntries  = Object.entries(gc).sort((a, b) => b[1] - a[1]);
+    if (!gEntries.length) {
+      genreArea.innerHTML = '<div class="chart-empty">No genres tagged yet</div>';
+      return;
+    }
 
-  if (gEntries.length) {
-    genreArea.innerHTML = '<canvas id="genreChart"></canvas>';
-    _charts.genre = new Chart(document.getElementById('genreChart'), {
-      type: 'doughnut',
-      data: {
-        labels: gEntries.map(([g]) => g),
-        datasets: [{
-          data: gEntries.map(([, c]) => c),
-          backgroundColor: palette.slice(0, gEntries.length),
-          borderWidth: 3,
-          borderColor: surface,
-          hoverOffset: 10,
-        }]
-      },
-      options: {
-        responsive: true,
-        animation: { animateRotate: true, duration: 900, easing: 'easeOutQuart' },
-        plugins: {
-          legend: {
-            position: 'bottom',
-            align: 'start',
-            labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' }, padding: 10, boxWidth: 10, boxHeight: 10, boxPadding: 3, color: '#7a5c40' }
-          },
-          tooltip: { callbacks: { label: ctx => `  ${ctx.label}: ${ctx.parsed}` } }
+    if (genreView === 'list') {
+      const maxCount = gEntries[0][1];
+      genreArea.innerHTML = `<div class="genre-list">${gEntries.map(([genre, count], i) => `
+        <div class="genre-row">
+          <div class="genre-swatch" style="background:${palette[i % palette.length]}"></div>
+          <div class="genre-name">${genre}</div>
+          <div class="genre-bar-wrap">
+            <div class="genre-bar" style="width:${Math.round((count / maxCount) * 100)}%;background:${palette[i % palette.length]}"></div>
+          </div>
+          <div class="genre-count">${count}</div>
+        </div>
+      `).join('')}</div>`;
+    } else {
+      genreArea.innerHTML = '<canvas id="genreChart"></canvas>';
+      _charts.genre = new Chart(document.getElementById('genreChart'), {
+        type: 'doughnut',
+        data: {
+          labels: gEntries.map(([g]) => g),
+          datasets: [{
+            data: gEntries.map(([, c]) => c),
+            backgroundColor: palette.slice(0, gEntries.length),
+            borderWidth: 3, borderColor: '#fffdf8', hoverOffset: 10,
+          }]
         },
-        onClick(e, els) {
-          if (!els.length) return;
-          const [genre, count] = gEntries[els[0].index];
-          toast(`${genre} · ${count} ${count === 1 ? 'entry' : 'entries'}`);
+        options: {
+          responsive: true,
+          animation: { animateRotate: true, duration: 900, easing: 'easeOutQuart' },
+          plugins: {
+            legend: { position: 'bottom', align: 'start', labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' }, padding: 10, boxWidth: 10, boxHeight: 10, color: '#000000' } },
+            tooltip: { callbacks: { label: ctx => `  ${ctx.label}: ${ctx.parsed}` } }
+          }
         }
-      }
-    });
-  } else {
-    genreArea.innerHTML = '<div class="chart-empty">No genres tagged yet</div>';
+      });
+    }
+    document.getElementById('genreViewList')?.classList.toggle('active', genreView === 'list');
+    document.getElementById('genreViewChart')?.classList.toggle('active', genreView === 'chart');
   }
+
+  renderGenreArea();
+  document.getElementById('genreViewList')?.addEventListener('click', () => { genreView = 'list';  renderGenreArea(); });
+  document.getElementById('genreViewChart')?.addEventListener('click', () => { genreView = 'chart'; renderGenreArea(); });
 
 
   // Podium — Top Creators
