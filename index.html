@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Shelf</title>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { font-size: 12px; }
@@ -52,7 +54,7 @@
     }
     .logo {
       font-family: 'Baloo 2', sans-serif;
-      font-size: 1.55rem;
+      font-size: 2.1rem;
       font-weight: 800;
       white-space: nowrap;
     }
@@ -727,6 +729,24 @@
     }
     @keyframes sp { to { transform: rotate(360deg); } }
 
+    @keyframes statCardIn {
+      from { opacity: 0; transform: translateY(20px) scale(.97); }
+      to   { opacity: 1; transform: translateY(0)    scale(1); }
+    }
+    @keyframes statValPop {
+      0%   { transform: scale(.6);   opacity: 0; }
+      65%  { transform: scale(1.12); opacity: 1; }
+      80%  { transform: scale(.95); }
+      100% { transform: scale(1); }
+    }
+    .stat-card.anim {
+      animation: statCardIn .42s cubic-bezier(.22,1,.36,1) both;
+    }
+    .stat-val.anim {
+      display: inline-block;
+      animation: statValPop .5s cubic-bezier(.34,1.56,.64,1) both;
+    }
+
     .settings-hint {
       font-size: .83rem;
       color: var(--muted);
@@ -1016,12 +1036,41 @@
     .list-meta  { font-size: .76rem; color: var(--muted); margin-top: 2px; }
     .list-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 
+    /* Charts */
+    .charts-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .chart-card {
+      background: var(--surface);
+      border-radius: var(--r);
+      padding: 20px;
+      box-shadow: var(--shadow);
+    }
+    .chart-card-title {
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .09em;
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+    .chart-empty {
+      text-align: center;
+      color: var(--muted);
+      font-size: .78rem;
+      padding: 40px 0;
+    }
+
     @media (max-width: 580px) {
       .row2  { grid-template-columns: 1fr; }
       header { padding: 0 14px; gap: 10px; }
       main   { padding: 18px 14px; }
       .board { grid-template-columns: 1fr; }
       .list-right .badge { display: none; }
+      .charts-row { grid-template-columns: 1fr; }
     }
 
     /* Auth */
@@ -1037,18 +1086,26 @@
       width: 100%; max-width: 360px;
       background: var(--surface);
       border-radius: var(--r);
-      padding: 36px 32px;
+      padding: 36px 44px;
       box-shadow: var(--shadow-h);
       border: 2px solid var(--border);
-      display: flex; flex-direction: column; gap: 16px;
+      display: flex; flex-direction: column; gap: 22px;
     }
-    .auth-logo { font-family: 'Baloo 2', sans-serif; font-size: 1.4rem; font-weight: 800; }
+    .auth-logo { font-family: 'Baloo 2', sans-serif; font-size: 1.9rem; font-weight: 800; }
     .auth-logo span { background: linear-gradient(135deg, var(--amber), var(--rose)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
     .auth-sub { font-size: .78rem; color: var(--muted); margin-top: -8px; }
     .auth-tabs { display: flex; gap: 4px; background: var(--bg); border-radius: var(--r-sm); padding: 3px; }
     .auth-tab { flex: 1; padding: 6px; border: none; background: transparent; border-radius: 7px; font-family: inherit; font-size: .75rem; font-weight: 600; cursor: pointer; color: var(--muted); transition: all .15s; }
     .auth-tab.active { background: var(--surface); color: var(--amber); box-shadow: var(--shadow); }
     .auth-error { font-size: .72rem; color: var(--rose); min-height: 1em; }
+    #authFormBody { display: flex; flex-direction: column; gap: 14px; }
+    #authFormBody input {
+      font-size: .8rem;
+      padding: 11px 13px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    #authFormBody input#authPassword { padding-right: 36px; }
+    #authFormBody input::placeholder { color: #808588; font-family: 'Plus Jakarta Sans', sans-serif; }
     .user-chip {
       display: flex; align-items: center; gap: 8px;
       font-size: .72rem; color: var(--muted); font-weight: 500;
@@ -1107,27 +1164,41 @@
   <div class="auth-box">
     <div class="auth-logo"><span>The Shelf</span></div>
     <div class="auth-sub">Track the books you read & movies you watch</div>
-    <div class="auth-tabs">
-      <button class="auth-tab active" data-tab="signin">Sign in</button>
-      <button class="auth-tab"        data-tab="create">Create account</button>
-    </div>
-    <div class="fg">
-      <label>Username</label>
-      <input type="text" id="authUsername" placeholder="e.g. Minion" autocomplete="username" style="font-family:'Baloo 2',sans-serif" />
-    </div>
-    <div class="fg">
-      <label>Password</label>
-      <div style="position:relative">
-        <input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" style="width:100%;padding-right:36px;font-family:'Baloo 2',sans-serif" />
-        <button id="togglePw" type="button" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center">
-          <svg id="eyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
-          </svg>
-        </button>
+
+    <div id="authFormBody">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="signin">Sign in</button>
+        <button class="auth-tab"        data-tab="create">Create account</button>
       </div>
+      <div class="fg">
+        <label>Email</label>
+        <input type="email" id="authUsername" placeholder="you@email.com" autocomplete="email" />
+      </div>
+      <div class="fg" id="authDisplayNameFg" style="display:none">
+        <label>Username</label>
+        <input type="text" id="authDisplayName" placeholder="e.g. Minion" autocomplete="nickname" />
+      </div>
+      <div class="fg">
+        <label>Password</label>
+        <div style="position:relative">
+          <input type="password" id="authPassword" placeholder="••••••••" autocomplete="current-password" style="width:100%;padding-right:36px" />
+          <button id="togglePw" type="button" style="position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--muted);padding:0;display:flex;align-items:center">
+            <svg id="eyeIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <button class="btn-save" id="authSubmit" style="width:100%;margin-top:10px">Sign in</button>
+      <div class="auth-error" id="authError"></div>
     </div>
-    <button class="btn-save" id="authSubmit" style="width:100%;margin-top:10px">Sign in</button>
-    <div class="auth-error" id="authError"></div>
+
+    <div id="authPendingBody" style="display:none; text-align:center; padding:10px 0">
+      <div style="font-size:2.4rem; margin-bottom:14px">📬</div>
+      <div style="font-family:'Baloo 2',sans-serif; font-size:1.15rem; font-weight:800; margin-bottom:10px; color:var(--text)">Check your email</div>
+      <div style="font-size:.78rem; color:var(--muted); line-height:1.65; margin-bottom:22px">We sent a verification link to your inbox. Click it to activate your account, then come back to sign in.</div>
+      <button class="btn-cancel" id="backToSignIn" style="width:100%">Back to sign in</button>
+    </div>
   </div>
 </div>
 
@@ -1135,7 +1206,7 @@
   <div class="logo"><span>The Shelf</span></div>
   <nav>
     <button class="nav-btn active" data-view="library">Library</button>
-    <button class="nav-btn"        data-view="dashboard">Shelf Stats</button>
+    <button class="nav-btn"        data-view="dashboard">Stats</button>
     <button class="nav-btn"        data-view="favorites">Favorites</button>
   </nav>
   <span id="signOutBtn" style="display:none"></span>
@@ -1232,6 +1303,16 @@
   <!-- Dashboard view -->
   <div id="vDashboard" class="view">
     <div class="stats-grid" id="statsGrid"></div>
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-card-title">Genre Breakdown</div>
+        <div id="genreChartArea"><canvas id="genreChart"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">Ratings Distribution</div>
+        <canvas id="ratingChart"></canvas>
+      </div>
+    </div>
     <div class="dash-recent">
       <div class="sec-title">Recently Added</div>
       <div class="grid" id="recentGrid"></div>
@@ -1358,8 +1439,8 @@
   <div class="sidebar-section">
     <div class="sidebar-label">Edit Profile</div>
     <div class="fg" style="margin-bottom:8px">
-      <label>Username</label>
-      <input class="fi" id="sidebarUsername" type="text" placeholder="Your username" />
+      <label>Display Name</label>
+      <input class="fi" id="sidebarUsername" type="text" placeholder="Your name" />
     </div>
     <button class="btn-save" id="saveUsername" style="width:100%">Save name</button>
   </div>
@@ -1368,7 +1449,7 @@
     <div class="sidebar-label">Guide</div>
     <div class="sidebar-guide">
       <p><strong>Library</strong> — your main shelf. Add movies and books you've watched, read, or want to.</p>
-      <p><strong>Dashboard</strong> — stats at a glance: total watched, read, average rating, top genre.</p>
+      <p><strong>Stats</strong> — stats at a glance: total watched, read, average rating, top genre.</p>
       <p><strong>Favorites</strong> — entries you rated 4★ or 5★, automatically collected here.</p>
       <p>Use the <strong>view switcher</strong> to flip between Gallery, Table, Timeline, Board, or List layouts.</p>
     </div>
@@ -1384,9 +1465,19 @@
 <!-- Script -->
 <script>
 
+// Supabase — replace these two values with your project credentials
+const SUPABASE_URL = 'https://lxgrpmpcqljxgjbypjcg.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4Z3JwbXBjcWxqeGdqYnlwamNnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEzNjQ1OTEsImV4cCI6MjA5Njk0MDU5MX0.qv33eyQ5ZJh4AaRIG7T-vuwISvLNhPcrRA5qnmr3qGU';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Chart instances
+const _charts = {};
+function _destroyChart(k) { if (_charts[k]) { _charts[k].destroy(); delete _charts[k]; } }
+
 // State
 const S = {
   entries:    [],
+  userId:     null,
   type:       'movie',
   rating:     0,
   editingId:  null,
@@ -1573,6 +1664,16 @@ function renderTable() {
   `).join('');
 
   vc.innerHTML = `<div class="tbl-wrap"><table class="tbl">
+    <colgroup>
+      <col style="width:28%">
+      <col style="width:8%">
+      <col style="width:12%">
+      <col style="width:10%">
+      <col style="width:7%">
+      <col style="width:13%">
+      <col style="width:12%">
+      <col style="width:10%">
+    </colgroup>
     <thead><tr>${headCells}</tr></thead>
     <tbody>${rows}</tbody>
   </table></div>`;
@@ -1742,14 +1843,39 @@ function renderDashboard() {
   es.forEach(e => { if (e.genre) gc[e.genre] = (gc[e.genre] || 0) + 1; });
   const topGenre = Object.entries(gc).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
 
-  document.getElementById('statsGrid').innerHTML = `
-    <div class="stat-card"><div class="stat-icon">Film</div><div class="stat-val">${watched}</div><div class="stat-label">Movies Watched</div></div>
-    <div class="stat-card"><div class="stat-icon">Avg</div><div class="stat-val">${avg}</div><div class="stat-label">Rating</div></div>
-    <div class="stat-card"><div class="stat-icon">Genre</div><div class="stat-val" style="font-size:1.35rem">${topGenre}</div><div class="stat-label">Top Genre</div></div>
-    <div class="stat-card"><div class="stat-icon">Books</div><div class="stat-val">${read}</div><div class="stat-label">Books Read</div></div>
-    <div class="stat-card"><div class="stat-icon">List</div><div class="stat-val">${wantCt}</div><div class="stat-label">On Watchlist</div></div>
-    <div class="stat-card"><div class="stat-icon">All</div><div class="stat-val">${es.length}</div><div class="stat-label">Total Entries</div></div>
-  `;
+  const statsData = [
+    { icon: 'Film',  val: watched,   label: 'Movies Watched', isNum: true },
+    { icon: 'Avg',   val: avg,       label: 'Rating',         isNum: avg !== '—' },
+    { icon: 'Genre', val: topGenre,  label: 'Top Genre',      isNum: false, small: true },
+    { icon: 'Books', val: read,      label: 'Books Read',     isNum: true },
+    { icon: 'List',  val: wantCt,    label: 'On Watchlist',   isNum: true },
+    { icon: 'All',   val: es.length, label: 'Total Entries',  isNum: true },
+  ];
+
+  document.getElementById('statsGrid').innerHTML = statsData.map((s, i) => `
+    <div class="stat-card anim" style="animation-delay:${i * 70}ms">
+      <div class="stat-icon">${s.icon}</div>
+      <div class="stat-val anim" data-target="${s.isNum ? s.val : ''}" style="${s.small ? 'font-size:1.35rem;' : ''}animation-delay:${i * 70 + 120}ms">${s.val}</div>
+      <div class="stat-label">${s.label}</div>
+    </div>
+  `).join('');
+
+  // Animate numeric stat values
+  document.querySelectorAll('#statsGrid .stat-val[data-target]').forEach(el => {
+    const raw = el.dataset.target;
+    if (!raw) return;
+    const target  = parseFloat(raw);
+    const isFloat = raw.includes('.');
+    let start = null;
+    const step = ts => {
+      if (!start) start = ts;
+      const p = Math.min((ts - start) / 700, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = isFloat ? (ease * target).toFixed(1) : Math.round(ease * target);
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
 
   const recent = [...es].sort((a, b) => b.addedAt - a.addedAt).slice(0, 10);
   const rGrid  = document.getElementById('recentGrid');
@@ -1772,6 +1898,83 @@ function renderDashboard() {
     </div>
   `).join('');
   rGrid.querySelectorAll('.card').forEach(c => c.addEventListener('click', () => openDetail(c.dataset.id)));
+
+  // Charts
+  _destroyChart('genre');
+  _destroyChart('rating');
+
+  const palette = ['#b56830','#5e8a5a','#b86050','#c89030','#6a8cc8','#9b6aab','#4a7a70','#e08040','#8aaa60','#d06050','#a88020','#5a7a9a'];
+  const surface = '#fffdf8';
+
+  const genreArea = document.getElementById('genreChartArea');
+  const gEntries  = Object.entries(gc).sort((a, b) => b[1] - a[1]);
+
+  if (gEntries.length) {
+    genreArea.innerHTML = '<canvas id="genreChart"></canvas>';
+    _charts.genre = new Chart(document.getElementById('genreChart'), {
+      type: 'doughnut',
+      data: {
+        labels: gEntries.map(([g]) => g),
+        datasets: [{
+          data: gEntries.map(([, c]) => c),
+          backgroundColor: palette.slice(0, gEntries.length),
+          borderWidth: 3,
+          borderColor: surface,
+          hoverOffset: 10,
+        }]
+      },
+      options: {
+        responsive: true,
+        animation: { animateRotate: true, duration: 900, easing: 'easeOutQuart' },
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }, padding: 10, boxWidth: 12, boxHeight: 12, color: '#7a5c40' }
+          },
+          tooltip: { callbacks: { label: ctx => `  ${ctx.label}: ${ctx.parsed}` } }
+        },
+        onClick(e, els) {
+          if (!els.length) return;
+          const [genre, count] = gEntries[els[0].index];
+          toast(`${genre} · ${count} ${count === 1 ? 'entry' : 'entries'}`);
+        }
+      }
+    });
+  } else {
+    genreArea.innerHTML = '<div class="chart-empty">No genres tagged yet</div>';
+  }
+
+  const rCounts = [1, 2, 3, 4, 5].map(r => es.filter(e => e.rating === r).length);
+  _charts.rating = new Chart(document.getElementById('ratingChart'), {
+    type: 'bar',
+    data: {
+      labels: ['★', '★★', '★★★', '★★★★', '★★★★★'],
+      datasets: [{
+        data: rCounts,
+        backgroundColor: ['#f0d0c8', '#eedfc8', '#eed890', '#cde0c8', '#b56830'],
+        borderRadius: 8,
+        borderSkipped: false,
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: { duration: 900, easing: 'easeOutQuart' },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: ctx => `  ${ctx.parsed.y} ${ctx.parsed.y === 1 ? 'entry' : 'entries'}` } }
+      },
+      scales: {
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }, color: '#7a5c40' }, grid: { color: '#dcc8a8' }, border: { display: false } },
+        x: { grid: { display: false }, ticks: { font: { size: 14 }, color: '#c89030' }, border: { display: false } }
+      },
+      onClick(e, els) {
+        if (!els.length) return;
+        const stars  = els[0].index + 1;
+        const count  = rCounts[els[0].index];
+        toast(`${'★'.repeat(stars)} · ${count} ${count === 1 ? 'entry' : 'entries'}`);
+      }
+    }
+  });
 }
 
 // Favorites
@@ -2039,7 +2242,7 @@ document.getElementById('fSort').addEventListener('change',   e => { S.filters.s
 function openSidebar() {
   document.getElementById('sidebar').classList.add('open');
   document.getElementById('sidebarBackdrop').classList.add('open');
-  document.getElementById('sidebarUsername').value = localStorage.getItem('mt_session') || '';
+  document.getElementById('sidebarUsername').value = localStorage.getItem('mt_display') || '';
 }
 function closeSidebar() {
   document.getElementById('sidebar').classList.remove('open');
@@ -2049,12 +2252,12 @@ document.getElementById('sidebarBtn').addEventListener('click', openSidebar);
 document.getElementById('closeSidebar').addEventListener('click', closeSidebar);
 document.getElementById('sidebarBackdrop').addEventListener('click', closeSidebar);
 
-document.getElementById('saveUsername').addEventListener('click', () => {
+document.getElementById('saveUsername').addEventListener('click', async () => {
   const name = document.getElementById('sidebarUsername').value.trim();
   if (!name) return;
-  localStorage.setItem('mt_session', name);
-  document.getElementById('userDisplayName').textContent = name;
-  document.getElementById('sidebarUsername').value = name;
+  await sb.auth.updateUser({ data: { display_name: name } });
+  document.getElementById('userDisplayName').textContent = name + "'s personal book & movie tracker";
+  localStorage.setItem('mt_display', name);
   toast('Name updated');
 });
 
@@ -2077,42 +2280,41 @@ document.addEventListener('keydown', e => {
     document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
 });
 
-// Auth helpers
-async function hashPassword(pw) {
-  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
-  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+// Per-user storage key
+function entriesKey(userId) { return 'mt_entries_' + userId; }
+
+// Persist entries to localStorage under the logged-in user's id
+function persist() {
+  if (S.userId) localStorage.setItem(entriesKey(S.userId), JSON.stringify(S.entries));
 }
-function getUsers() { return JSON.parse(localStorage.getItem('mt_users') || '[]'); }
-function saveUsers(u) { localStorage.setItem('mt_users', JSON.stringify(u)); }
+function removeEntry() { persist(); }
 
-function entriesKey(username) { return 'mt_entries_' + username.toLowerCase(); }
-
-function showApp(username) {
+function showApp(user) {
+  S.userId = user.id;
+  const name = user.user_metadata?.display_name || user.email;
   document.getElementById('authScreen').classList.add('hidden');
-  document.getElementById('userDisplayName').textContent = username + "'s personal book & movie tracker";
-  localStorage.setItem('mt_session', username);
-  S.entries = JSON.parse(localStorage.getItem(entriesKey(username)) || '[]');
+  document.getElementById('authFormBody').style.display   = '';
+  document.getElementById('authPendingBody').style.display = 'none';
+  document.getElementById('userDisplayName').textContent  = name + "'s personal book & movie tracker";
+  localStorage.setItem('mt_display', name);
+  S.entries = JSON.parse(localStorage.getItem(entriesKey(user.id)) || '[]');
   const v = localStorage.getItem('mt_view');
   if (v) { S.view = v; document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.v === v)); updateViewToggleLabel(v); }
-  const k = localStorage.getItem('mt_key');
-  if (k && document.getElementById('apiKey')) document.getElementById('apiKey').value = k;
   renderLibrary();
   renderDashboard();
 }
 
 function showAuthScreen() {
   document.getElementById('authScreen').classList.remove('hidden');
-  document.getElementById('userDisplayName').textContent = '';
-  document.getElementById('authUsername').value = '';
-  document.getElementById('authPassword').value = '';
+  document.getElementById('authFormBody').style.display   = '';
+  document.getElementById('authPendingBody').style.display = 'none';
+  document.getElementById('userDisplayName').textContent  = '';
+  document.getElementById('authUsername').value    = '';
+  document.getElementById('authDisplayName').value = '';
+  document.getElementById('authPassword').value    = '';
   document.getElementById('authError').textContent = '';
   document.getElementById('authUsername').focus();
 }
-
-// Override persist/removeEntry to use per-user key
-const _origPersist = persist;
-function persist() { localStorage.setItem(entriesKey(localStorage.getItem('mt_session') || 'default'), JSON.stringify(S.entries)); }
-function removeEntry() { persist(); }
 
 // Auth tabs
 let authMode = 'signin';
@@ -2121,40 +2323,52 @@ document.querySelectorAll('.auth-tab').forEach(tab => {
     authMode = tab.dataset.tab;
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t === tab));
     document.getElementById('authSubmit').textContent = authMode === 'signin' ? 'Sign in' : 'Create account';
-    document.getElementById('authError').textContent = '';
+    document.getElementById('authError').textContent  = '';
+    document.getElementById('authDisplayNameFg').style.display = authMode === 'create' ? '' : 'none';
   });
 });
 
 document.getElementById('authSubmit').addEventListener('click', async () => {
-  const username = document.getElementById('authUsername').value.trim();
-  const password = document.getElementById('authPassword').value;
-  const errEl    = document.getElementById('authError');
+  const email       = document.getElementById('authUsername').value.trim().toLowerCase();
+  const displayName = document.getElementById('authDisplayName').value.trim();
+  const password    = document.getElementById('authPassword').value;
+  const errEl       = document.getElementById('authError');
   errEl.textContent = '';
-  if (!username || !password) { errEl.textContent = 'Please fill in both fields.'; return; }
+  if (!email || !password) { errEl.textContent = 'Please fill in all fields.'; return; }
+  if (authMode === 'create' && !displayName) { errEl.textContent = 'Please enter a username.'; return; }
 
   const btn = document.getElementById('authSubmit');
   btn.disabled = true; btn.textContent = '…';
 
-  const hash  = await hashPassword(password);
-  const users = getUsers();
-
   if (authMode === 'create') {
-    if (users.find(u => u.username.toLowerCase() === username.toLowerCase())) {
-      errEl.textContent = 'Username already taken.';
+    const { error } = await sb.auth.signUp({
+      email,
+      password,
+      options: { data: { display_name: displayName } }
+    });
+    if (error) {
+      errEl.textContent = error.message;
     } else {
-      users.push({ username, hash });
-      saveUsers(users);
-      showApp(username);
+      document.getElementById('authFormBody').style.display   = 'none';
+      document.getElementById('authPendingBody').style.display = '';
     }
   } else {
-    const user = users.find(u => u.username.toLowerCase() === username.toLowerCase());
-    if (!user)          errEl.textContent = 'Username not found.';
-    else if (user.hash !== hash) errEl.textContent = 'Incorrect password.';
-    else showApp(username);
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) errEl.textContent = error.message;
+    else showApp(data.user);
   }
 
   btn.disabled = false;
   btn.textContent = authMode === 'signin' ? 'Sign in' : 'Create account';
+});
+
+document.getElementById('backToSignIn').addEventListener('click', () => {
+  authMode = 'signin';
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === 'signin'));
+  document.getElementById('authSubmit').textContent = 'Sign in';
+  document.getElementById('authDisplayNameFg').style.display = 'none';
+  document.getElementById('authFormBody').style.display   = '';
+  document.getElementById('authPendingBody').style.display = 'none';
 });
 
 document.getElementById('authPassword').addEventListener('keydown', e => {
@@ -2170,21 +2384,21 @@ document.getElementById('togglePw').addEventListener('click', () => {
     : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
 });
 
-document.getElementById('signOutBtn').addEventListener('click', () => {
-  localStorage.removeItem('mt_session');
-  S.entries = [];
-  showAuthScreen();
+document.getElementById('signOutBtn').addEventListener('click', async () => {
+  await sb.auth.signOut();
 });
 
-// Init
-const session = localStorage.getItem('mt_session');
-if (session) {
-  showApp(session);
-} else {
-  showAuthScreen();
-  renderLibrary();
-  renderDashboard();
-}
+// Auth state listener — handles sign in, sign out, and email verification redirect
+sb.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session)  showApp(session.user);
+  if (event === 'SIGNED_OUT') { S.userId = null; S.entries = []; showAuthScreen(); renderLibrary(); renderDashboard(); }
+});
+
+// Init — restore session if already logged in
+sb.auth.getSession().then(({ data: { session } }) => {
+  if (session) showApp(session.user);
+  else { showAuthScreen(); renderLibrary(); renderDashboard(); }
+});
 </script>
 </body>
 </html>
