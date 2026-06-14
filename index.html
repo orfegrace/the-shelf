@@ -1358,15 +1358,16 @@
   <!-- Dashboard view -->
   <div id="vDashboard" class="view">
     <div class="stats-grid" id="statsGrid"></div>
-    <div class="charts-row" style="grid-template-columns:1fr 1fr 1fr">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:28px">
       <div class="chart-card">
         <div class="chart-card-title">Genre Breakdown</div>
         <div id="genreChartArea"><canvas id="genreChart"></canvas></div>
       </div>
-      <div class="chart-card" id="mvbCard"></div>
-      <div class="chart-card" id="topCreatorsCard"></div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <div class="chart-card" id="mvbCard"></div>
+        <div id="podiumSection"></div>
+      </div>
     </div>
-    <div id="podiumSection" style="margin-bottom:28px"></div>
     <div class="dash-recent">
       <div class="sec-title">Recently Added</div>
       <div class="grid" id="recentGrid"></div>
@@ -1985,28 +1986,6 @@ function renderDashboard() {
       <span style="font-size:.68rem;color:var(--amber);font-weight:700">${moviePct}%</span>
       <span style="font-size:.68rem;color:#5e8a5a;font-weight:700">${bookPct}%</span>
     </div>
-  `;
-
-  document.getElementById('topCreatorsCard').innerHTML = `
-    <div class="chart-card-title">Top Creators</div>
-    ${topCreators.length ? `
-      <div style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
-        ${topCreators.map(([name, count], i) => `
-          <div>
-            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-              <div style="display:flex;align-items:center;gap:7px">
-                <span style="font-family:'Baloo 2',sans-serif;font-size:.65rem;font-weight:800;background:${rankColors[i]};padding:2px 7px;border-radius:var(--pill);color:var(--text)">${rankLabels[i]}</span>
-                <span style="font-weight:700;font-size:.85rem;color:var(--text)">${name}</span>
-              </div>
-              <span style="font-size:.75rem;font-weight:700;color:var(--muted)">${count}</span>
-            </div>
-            <div style="height:6px;border-radius:var(--pill);background:var(--bg);overflow:hidden">
-              <div style="height:100%;width:${Math.round((count/maxCreator)*100)}%;background:${rankColors[i]};border-radius:var(--pill)"></div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    ` : '<div class="chart-empty">No creators tagged yet</div>'}
   `;
 
   // Animate numeric stat values
