@@ -476,6 +476,11 @@
       flex-direction: column;
       gap: 6px;
       min-height: 110px;
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .stat-card:hover {
+      transform: translateY(-4px) scale(1.02);
+      box-shadow: 0 10px 28px rgba(120,80,30,.14);
     }
     .stat-icon {
       display: inline-block;
@@ -1093,6 +1098,11 @@
       border-radius: var(--r);
       padding: 20px;
       box-shadow: var(--shadow);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .chart-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 10px 28px rgba(120,80,30,.14);
     }
     .chart-card-title {
       font-size: .72rem;
@@ -1352,10 +1362,6 @@
       <div class="chart-card">
         <div class="chart-card-title">Genre Breakdown</div>
         <div id="genreChartArea"><canvas id="genreChart"></canvas></div>
-      </div>
-      <div class="chart-card">
-        <div class="chart-card-title">Ratings Distribution</div>
-        <canvas id="ratingChart" style="max-height:180px"></canvas>
       </div>
     </div>
     <div id="splitSection" style="margin-bottom:28px"></div>
@@ -1843,12 +1849,15 @@ function renderBoard() {
     boardHTML = makeBoard(groups, Math.min(groups.length, 3));
   } else {
     const yearMap = new Map();
-    [...list].sort((a, b) => b.addedAt - a.addedAt).forEach(e => {
-      const yr = String(new Date(e.addedAt).getFullYear());
+    [...list].sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0)).forEach(e => {
+      const ts = e.addedAt && !isNaN(e.addedAt) ? e.addedAt : Date.now();
+      const yr = String(new Date(ts).getFullYear());
       if (!yearMap.has(yr)) yearMap.set(yr, []);
       yearMap.get(yr).push(e);
     });
-    const groups = [...yearMap.entries()].map(([yr, entries]) => [yr, entries, 'None']);
+    const groups = [...yearMap.entries()]
+      .sort((a, b) => Number(b[0]) - Number(a[0]))
+      .map(([yr, entries]) => [yr, entries, 'None']);
     boardHTML = makeBoard(groups, Math.min(groups.length, 4));
   }
 
@@ -2043,7 +2052,6 @@ function renderDashboard() {
 
   // Charts
   _destroyChart('genre');
-  _destroyChart('rating');
 
   const palette = ['#f0c4a0','#b8d9b4','#f2bab4','#f2dca0','#b8ccf0','#d8b8e8','#aacec8','#f5c898','#c4daa8','#f2b4ac','#ecd498','#afc8e0'];
   const surface = '#fffdf8';
@@ -2086,38 +2094,6 @@ function renderDashboard() {
     genreArea.innerHTML = '<div class="chart-empty">No genres tagged yet</div>';
   }
 
-  const rCounts = [1, 2, 3, 4, 5].map(r => es.filter(e => e.rating === r).length);
-  _charts.rating = new Chart(document.getElementById('ratingChart'), {
-    type: 'bar',
-    data: {
-      labels: ['★', '★★', '★★★', '★★★★', '★★★★★'],
-      datasets: [{
-        data: rCounts,
-        backgroundColor: ['#f0d0c8', '#eedfc8', '#eed890', '#cde0c8', '#b56830'],
-        borderRadius: 8,
-        borderSkipped: false,
-      }]
-    },
-    options: {
-      responsive: true,
-      animation: { duration: 900, easing: 'easeOutQuart' },
-      layout: { padding: { bottom: -10 } },
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: ctx => `  ${ctx.parsed.y} ${ctx.parsed.y === 1 ? 'entry' : 'entries'}` } }
-      },
-      scales: {
-        y: { beginAtZero: true, ticks: { stepSize: 1, font: { family: "'Plus Jakarta Sans', sans-serif", size: 11 }, color: '#7a5c40' }, grid: { color: '#dcc8a8' }, border: { display: false } },
-        x: { grid: { display: false }, ticks: { font: { size: 14 }, color: '#c89030' }, border: { display: false } }
-      },
-      onClick(e, els) {
-        if (!els.length) return;
-        const stars  = els[0].index + 1;
-        const count  = rCounts[els[0].index];
-        toast(`${'★'.repeat(stars)} · ${count} ${count === 1 ? 'entry' : 'entries'}`);
-      }
-    }
-  });
 
   // Podium
   const podiumEl = document.getElementById('podiumSection');
@@ -2238,7 +2214,7 @@ function openDetail(id) {
   const e = S.entries.find(x => x.id === id);
   if (!e) return;
   const cl = e.type === 'movie' ? 'Director' : 'Author';
-  const dl = e.type === 'movie' ? 'Date Watched' : 'Date Finished';
+  const fmtDate = d => new Date(d + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 
   document.getElementById('detContent').innerHTML = `
     <button class="close-btn" id="closeDet" style="position:absolute;top:12px;right:12px;z-index:10;background:rgba(255,255,255,0.18)">✕</button>
@@ -2253,7 +2229,7 @@ function openDetail(id) {
       ${e.creator ? `<div class="det-meta">${cl}: <strong>${e.creator}</strong></div>` : ''}
       ${e.year    ? `<div class="det-meta">Year: <strong>${e.year}</strong></div>` : ''}
       ${e.rating  ? starsHTML(e.rating, '1.35rem') : ''}
-      ${e.date    ? `<div class="det-meta">${dl}: <strong>${e.date}</strong></div>` : ''}
+      ${e.date    ? `<div class="det-meta">Date: <strong>${fmtDate(e.date)}</strong></div>` : ''}
       ${e.notes   ? `<div class="det-notes">${e.notes}</div>` : ''}
       <div class="det-actions">
         <button class="btn-edit"   id="dEdit">Edit</button>
