@@ -1542,20 +1542,6 @@ const S = {
   filters:    { type: 'all', status: 'all', search: '', sort: 'watched', rating: 'all' },
 };
 
-// Storage
-function persist() { localStorage.setItem('mt_entries', JSON.stringify(S.entries)); }
-function removeEntry(id) { localStorage.setItem('mt_entries', JSON.stringify(S.entries)); }
-
-function hydrate() {
-  const raw = localStorage.getItem('mt_entries');
-  S.entries = raw ? JSON.parse(raw) : [];
-  const v = localStorage.getItem('mt_view');
-  if (v) {
-    S.view = v;
-    document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.v === v));
-    updateViewToggleLabel(v);
-  }
-}
 
 // Toast
 function toast(msg) {
@@ -2254,10 +2240,10 @@ function openDetail(id) {
     document.getElementById('detOverlay').classList.remove('open');
     openAdd(id);
   };
-  document.getElementById('dDel').onclick = () => {
+  document.getElementById('dDel').onclick = async () => {
     if (!confirm(`Delete "${e.title}"? This can't be undone.`)) return;
     S.entries = S.entries.filter(x => x.id !== id);
-    removeEntry(id);
+    await removeEntry(id);
     renderLibrary();
     renderDashboard();
     document.getElementById('detOverlay').classList.remove('open');
@@ -2339,7 +2325,7 @@ function saveEntry() {
     toast('Entry added');
   }
 
-  persist();
+  persist(entry);
   renderLibrary();
   renderDashboard();
   closeAdd();
@@ -2440,16 +2426,38 @@ document.addEventListener('keydown', e => {
     document.querySelectorAll('.overlay.open').forEach(o => o.classList.remove('open'));
 });
 
-// Per-user storage key
+// Per-user local storage key (for migration only)
 function entriesKey(userId) { return 'mt_entries_' + userId; }
 
-// Persist entries to localStorage under the logged-in user's id
-function persist() {
-  if (S.userId) localStorage.setItem(entriesKey(S.userId), JSON.stringify(S.entries));
+// Persist a single entry to Supabase
+async function persist(entry) {
+  if (!S.userId) return;
+  const { error } = await sb.from('entries').upsert({
+    id:       entry.id,
+    user_id:  S.userId,
+    type:     entry.type,
+    title:    entry.title,
+    year:     entry.year,
+    creator:  entry.creator,
+    genre:    entry.genre,
+    status:   entry.status,
+    date:     entry.date,
+    rating:   entry.rating,
+    cover:    entry.cover,
+    notes:    entry.notes,
+    added_at: entry.addedAt,
+  });
+  if (error) toast('Save failed: ' + error.message);
 }
-function removeEntry() { persist(); }
 
-function showApp(user) {
+// Delete an entry from Supabase
+async function removeEntry(id) {
+  if (!S.userId) return;
+  const { error } = await sb.from('entries').delete().eq('id', id).eq('user_id', S.userId);
+  if (error) toast('Delete failed: ' + error.message);
+}
+
+async function showApp(user) {
   S.userId = user.id;
   const name = user.user_metadata?.display_name || user.email;
   document.getElementById('authScreen').classList.add('hidden');
@@ -2457,19 +2465,36 @@ function showApp(user) {
   document.getElementById('authPendingBody').style.display = 'none';
   document.getElementById('userDisplayName').textContent  = name + "'s personal book & movie tracker";
   localStorage.setItem('mt_display', name);
-  S.entries = JSON.parse(localStorage.getItem(entriesKey(user.id)) || '[]');
 
-  // One-time migration: if new account is empty, import any old-format entries
-  if (S.entries.length === 0) {
-    const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-    const oldKey = Object.keys(localStorage)
-      .filter(k => k.startsWith('mt_entries_') && !uuidRe.test(k.replace('mt_entries_', '')))
-      .map(k => ({ k, entries: JSON.parse(localStorage.getItem(k) || '[]') }))
-      .sort((a, b) => b.entries.length - a.entries.length)[0];
-    if (oldKey && oldKey.entries.length > 0) {
-      S.entries = oldKey.entries;
-      persist();
-      toast(`Imported ${S.entries.length} entries from your old account!`);
+  const { data, error } = await sb.from('entries').select('*').eq('user_id', user.id).order('added_at', { ascending: false });
+  if (error) {
+    toast('Failed to load entries');
+    S.entries = [];
+  } else {
+    S.entries = (data || []).map(row => ({
+      id:      row.id,
+      type:    row.type,
+      title:   row.title,
+      year:    row.year,
+      creator: row.creator,
+      genre:   row.genre,
+      status:  row.status,
+      date:    row.date,
+      rating:  row.rating,
+      cover:   row.cover,
+      notes:   row.notes,
+      addedAt: row.added_at,
+    }));
+
+    // One-time migration: push any existing localStorage entries into Supabase
+    if (S.entries.length === 0) {
+      const localRaw = localStorage.getItem(entriesKey(user.id));
+      const localEntries = localRaw ? JSON.parse(localRaw) : [];
+      if (localEntries.length > 0) {
+        S.entries = localEntries;
+        await Promise.all(localEntries.map(e => persist(e)));
+        toast(`Migrated ${localEntries.length} entries to the cloud!`);
+      }
     }
   }
 
