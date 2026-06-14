@@ -1358,13 +1358,14 @@
   <!-- Dashboard view -->
   <div id="vDashboard" class="view">
     <div class="stats-grid" id="statsGrid"></div>
-    <div class="charts-row">
+    <div class="charts-row" style="grid-template-columns:1fr 1fr 1fr">
       <div class="chart-card">
         <div class="chart-card-title">Genre Breakdown</div>
         <div id="genreChartArea"><canvas id="genreChart"></canvas></div>
       </div>
+      <div class="chart-card" id="mvbCard"></div>
+      <div class="chart-card" id="topCreatorsCard"></div>
     </div>
-    <div id="splitSection" style="margin-bottom:28px"></div>
     <div id="podiumSection" style="margin-bottom:28px"></div>
     <div class="dash-recent">
       <div class="sec-title">Recently Added</div>
@@ -1963,52 +1964,49 @@ function renderDashboard() {
   const rankColors  = ['#f5d98a', '#e8e4dc', '#f0c4a0'];
   const rankLabels  = ['1st', '2nd', '3rd'];
 
-  document.getElementById('splitSection').innerHTML = `
-    <div class="charts-row">
-      <div class="chart-card">
-        <div class="chart-card-title">Movies vs Books</div>
-        <div style="display:flex;justify-content:space-between;align-items:flex-end;margin:18px 0 12px">
-          <div style="text-align:center;flex:1">
-            <div style="font-family:'Baloo 2',sans-serif;font-size:2.2rem;font-weight:800;color:var(--amber)">${movieCount}</div>
-            <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Movies</div>
-          </div>
-          <div style="font-size:1rem;color:var(--border);font-weight:700;padding-bottom:8px">vs</div>
-          <div style="text-align:center;flex:1">
-            <div style="font-family:'Baloo 2',sans-serif;font-size:2.2rem;font-weight:800;color:#5e8a5a">${bookCount}</div>
-            <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Books</div>
-          </div>
-        </div>
-        <div style="height:10px;border-radius:var(--pill);overflow:hidden;background:var(--bg);display:flex">
-          <div style="width:${moviePct}%;background:var(--amber);transition:width .8s ease"></div>
-          <div style="width:${bookPct}%;background:#5e8a5a;transition:width .8s ease"></div>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px">
-          <span style="font-size:.68rem;color:var(--amber);font-weight:700">${moviePct}%</span>
-          <span style="font-size:.68rem;color:#5e8a5a;font-weight:700">${bookPct}%</span>
-        </div>
+  document.getElementById('mvbCard').innerHTML = `
+    <div class="chart-card-title">Movies vs Books</div>
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin:18px 0 12px">
+      <div style="text-align:center;flex:1">
+        <div style="font-family:'Baloo 2',sans-serif;font-size:2.2rem;font-weight:800;color:var(--amber)">${movieCount}</div>
+        <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Movies</div>
       </div>
-      <div class="chart-card">
-        <div class="chart-card-title">Top Creators</div>
-        ${topCreators.length ? `
-          <div style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
-            ${topCreators.map(([name, count], i) => `
-              <div>
-                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
-                  <div style="display:flex;align-items:center;gap:7px">
-                    <span style="font-family:'Baloo 2',sans-serif;font-size:.65rem;font-weight:800;background:${rankColors[i]};padding:2px 7px;border-radius:var(--pill);color:var(--text)">${rankLabels[i]}</span>
-                    <span style="font-weight:700;font-size:.85rem;color:var(--text)">${name}</span>
-                  </div>
-                  <span style="font-size:.75rem;font-weight:700;color:var(--muted)">${count}</span>
-                </div>
-                <div style="height:6px;border-radius:var(--pill);background:var(--bg);overflow:hidden">
-                  <div style="height:100%;width:${Math.round((count/maxCreator)*100)}%;background:${rankColors[i]};border-radius:var(--pill)"></div>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        ` : '<div class="chart-empty">No creators tagged yet</div>'}
+      <div style="font-size:1rem;color:var(--border);font-weight:700;padding-bottom:8px">vs</div>
+      <div style="text-align:center;flex:1">
+        <div style="font-family:'Baloo 2',sans-serif;font-size:2.2rem;font-weight:800;color:#5e8a5a">${bookCount}</div>
+        <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Books</div>
       </div>
     </div>
+    <div style="height:10px;border-radius:var(--pill);overflow:hidden;background:var(--bg);display:flex">
+      <div style="width:${moviePct}%;background:var(--amber);transition:width .8s ease"></div>
+      <div style="width:${bookPct}%;background:#5e8a5a;transition:width .8s ease"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px">
+      <span style="font-size:.68rem;color:var(--amber);font-weight:700">${moviePct}%</span>
+      <span style="font-size:.68rem;color:#5e8a5a;font-weight:700">${bookPct}%</span>
+    </div>
+  `;
+
+  document.getElementById('topCreatorsCard').innerHTML = `
+    <div class="chart-card-title">Top Creators</div>
+    ${topCreators.length ? `
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
+        ${topCreators.map(([name, count], i) => `
+          <div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px">
+              <div style="display:flex;align-items:center;gap:7px">
+                <span style="font-family:'Baloo 2',sans-serif;font-size:.65rem;font-weight:800;background:${rankColors[i]};padding:2px 7px;border-radius:var(--pill);color:var(--text)">${rankLabels[i]}</span>
+                <span style="font-weight:700;font-size:.85rem;color:var(--text)">${name}</span>
+              </div>
+              <span style="font-size:.75rem;font-weight:700;color:var(--muted)">${count}</span>
+            </div>
+            <div style="height:6px;border-radius:var(--pill);background:var(--bg);overflow:hidden">
+              <div style="height:100%;width:${Math.round((count/maxCreator)*100)}%;background:${rankColors[i]};border-radius:var(--pill)"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    ` : '<div class="chart-empty">No creators tagged yet</div>'}
   `;
 
   // Animate numeric stat values
@@ -2079,7 +2077,8 @@ function renderDashboard() {
         plugins: {
           legend: {
             position: 'bottom',
-            labels: { font: { family: "'Baloo 2', sans-serif", size: 12, weight: '600' }, padding: 12, boxWidth: 11, boxHeight: 11, color: '#7a5c40' }
+            align: 'start',
+            labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' }, padding: 10, boxWidth: 10, boxHeight: 10, boxPadding: 3, color: '#7a5c40' }
           },
           tooltip: { callbacks: { label: ctx => `  ${ctx.label}: ${ctx.parsed}` } }
         },
@@ -2095,25 +2094,25 @@ function renderDashboard() {
   }
 
 
-  // Podium
+  // Podium — Top Creators
   const podiumEl = document.getElementById('podiumSection');
-  const top3 = gEntries.slice(0, 3);
-  if (top3.length >= 1) {
-    const slots  = [top3[1], top3[0], top3[2]]; // 2nd, 1st, 3rd
-    const medals = ['🥈', '🥇', '🥉'];
+  if (topCreators.length >= 1) {
+    const top3c   = topCreators.slice(0, 3);
+    const slots   = [top3c[1], top3c[0], top3c[2]]; // 2nd, 1st, 3rd
+    const medals  = ['🥈', '🥇', '🥉'];
     const heights = ['90px', '128px', '66px'];
     const bgColors = ['#e8e4dc', '#f5d98a', '#f0c4a0'];
     const labels  = ['2nd', '1st', '3rd'];
 
     podiumEl.innerHTML = `
       <div class="chart-card">
-        <div class="chart-card-title">Top Genres</div>
+        <div class="chart-card-title">Top Creators Podium</div>
         <div style="display:flex;align-items:flex-end;justify-content:center;gap:10px;padding:16px 0 0">
-          ${slots.map((g, i) => g ? `
+          ${slots.map((c, i) => c ? `
             <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;max-width:150px">
               <div style="font-size:1.8rem;line-height:1">${medals[i]}</div>
-              <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:.9rem;text-align:center;color:var(--text);line-height:1.3">${g[0]}</div>
-              <div style="font-size:.7rem;color:var(--muted);font-weight:600">${g[1]} ${g[1] === 1 ? 'entry' : 'entries'}</div>
+              <div style="font-family:'Baloo 2',sans-serif;font-weight:700;font-size:.9rem;text-align:center;color:var(--text);line-height:1.3">${c[0]}</div>
+              <div style="font-size:.7rem;color:var(--muted);font-weight:600">${c[1]} ${c[1] === 1 ? 'entry' : 'entries'}</div>
               <div style="width:100%;height:${heights[i]};background:${bgColors[i]};border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.06)">
                 <span style="font-family:'Baloo 2',sans-serif;font-size:1.6rem;font-weight:800;color:var(--text);opacity:.18">${labels[i]}</span>
               </div>
