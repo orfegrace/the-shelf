@@ -2173,7 +2173,7 @@ function renderDashboard() {
     requestAnimationFrame(step);
   });
 
-  const recent = [...es].sort((a, b) => b.addedAt - a.addedAt).slice(0, 8);
+  const recent = [...es].sort((a, b) => b.addedAt - a.addedAt).slice(0, 15);
   const rGrid  = document.getElementById('recentGrid');
   if (!recent.length) {
     rGrid.innerHTML = `<div class="empty" style="position:relative;padding:24px 0"><h3>Nothing added yet</h3></div>`;
@@ -2234,6 +2234,13 @@ function renderDashboard() {
             borderWidth: 3, borderColor: '#fffdf8', hoverOffset: 10,
           }]
         },
+        plugins: [{
+          id: 'legendSpacing',
+          beforeInit(chart) {
+            const fit = chart.legend.fit;
+            chart.legend.fit = function() { fit.bind(chart.legend)(); this.height += 16; };
+          }
+        }],
         options: {
           responsive: true,
           animation: { animateRotate: true, duration: 900, easing: 'easeOutQuart' },
