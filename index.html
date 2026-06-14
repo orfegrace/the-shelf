@@ -1171,8 +1171,8 @@
         <button class="auth-tab"        data-tab="create">Create account</button>
       </div>
       <div class="fg">
-        <label>Email</label>
-        <input type="email" id="authUsername" placeholder="you@email.com" autocomplete="email" />
+        <label id="authEmailLabel">Username or Email</label>
+        <input type="text" id="authUsername" placeholder="you@email.com or username" autocomplete="email" />
       </div>
       <div class="fg" id="authDisplayNameFg" style="display:none">
         <label>Username</label>
@@ -2298,6 +2298,21 @@ function showApp(user) {
   document.getElementById('userDisplayName').textContent  = name + "'s personal book & movie tracker";
   localStorage.setItem('mt_display', name);
   S.entries = JSON.parse(localStorage.getItem(entriesKey(user.id)) || '[]');
+
+  // One-time migration: if new account is empty, import any old-format entries
+  if (S.entries.length === 0) {
+    const uuidRe = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const oldKey = Object.keys(localStorage)
+      .filter(k => k.startsWith('mt_entries_') && !uuidRe.test(k.replace('mt_entries_', '')))
+      .map(k => ({ k, entries: JSON.parse(localStorage.getItem(k) || '[]') }))
+      .sort((a, b) => b.entries.length - a.entries.length)[0];
+    if (oldKey && oldKey.entries.length > 0) {
+      S.entries = oldKey.entries;
+      persist();
+      toast(`Imported ${S.entries.length} entries from your old account!`);
+    }
+  }
+
   const v = localStorage.getItem('mt_view');
   if (v) { S.view = v; document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.v === v)); updateViewToggleLabel(v); }
   renderLibrary();
@@ -2325,6 +2340,8 @@ document.querySelectorAll('.auth-tab').forEach(tab => {
     document.getElementById('authSubmit').textContent = authMode === 'signin' ? 'Sign in' : 'Create account';
     document.getElementById('authError').textContent  = '';
     document.getElementById('authDisplayNameFg').style.display = authMode === 'create' ? '' : 'none';
+    document.getElementById('authEmailLabel').textContent = authMode === 'create' ? 'Email' : 'Username or Email';
+    document.getElementById('authUsername').placeholder  = authMode === 'create' ? 'you@email.com' : 'you@email.com or username';
   });
 });
 
@@ -2353,6 +2370,11 @@ document.getElementById('authSubmit').addEventListener('click', async () => {
       document.getElementById('authPendingBody').style.display = '';
     }
   } else {
+    if (!email.includes('@')) {
+      errEl.textContent = 'Please sign in with your email address.';
+      btn.disabled = false; btn.textContent = 'Sign in';
+      return;
+    }
     const { data, error } = await sb.auth.signInWithPassword({ email, password });
     if (error) errEl.textContent = error.message;
     else showApp(data.user);
