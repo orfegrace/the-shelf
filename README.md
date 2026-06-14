@@ -19,7 +19,7 @@ A personal tracker I built to keep my books and movies in one place. You can log
 <img width="1440" height="711" alt="Screenshot 2026-06-14 at 11 09 40 AM" src="https://github.com/user-attachments/assets/696bd05d-670f-4145-95be-a8c56981ab55" />
 
 ### Stats
-<img width="1440" height="714" alt="Screenshot 2026-06-13 at 11 49 26 PM" src="https://github.com/user-attachments/assets/44348f9d-5992-43b3-8b87-295094421054" />
+<img width="1440" height="753" alt="Screenshot 2026-06-14 at 11 36 46 AM" src="https://github.com/user-attachments/assets/aba7d709-7ac1-49e3-b5c5-97f13ced33d9" />
 
 ### Favorites
 <img width="1440" height="709" alt="Screenshot 2026-06-13 at 11 31 02 PM" src="https://github.com/user-attachments/assets/88373572-9dbf-473d-a7a8-124a2d48e97c" />
