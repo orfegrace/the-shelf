@@ -1366,6 +1366,7 @@
       <div style="display:flex;flex-direction:column;gap:16px">
         <div class="chart-card" id="mvbCard"></div>
         <div id="podiumSection"></div>
+        <div class="chart-card" id="statusCard"></div>
       </div>
     </div>
     <div class="dash-recent">
@@ -1986,6 +1987,37 @@ function renderDashboard() {
       <span style="font-size:.68rem;color:var(--amber);font-weight:700">${moviePct}%</span>
       <span style="font-size:.68rem;color:#5e8a5a;font-weight:700">${bookPct}%</span>
     </div>
+  `;
+
+  const statuses = [
+    { key: 'done',    label: 'Finished',      color: '#b8d9b4' },
+    { key: 'reading', label: 'In Progress',   color: '#f2dca0' },
+    { key: 'dnf',     label: 'Did Not Finish',color: '#f2bab4' },
+    { key: 'want',    label: 'Not Started',   color: '#b8ccf0' },
+  ];
+  const statusCounts = statuses.map(s => ({
+    ...s,
+    count: es.filter(e => s.key === 'want' ? (!e.status || e.status === 'want') : e.status === s.key).length,
+  })).filter(s => s.count > 0);
+  const maxStatus = statusCounts[0]?.count || 1;
+
+  document.getElementById('statusCard').innerHTML = `
+    <div class="chart-card-title">Status Breakdown</div>
+    ${statusCounts.length ? `
+      <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
+        ${statusCounts.map(s => `
+          <div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+              <span style="font-size:.82rem;font-weight:600;color:var(--text)">${s.label}</span>
+              <span style="font-size:.75rem;font-weight:700;color:var(--muted)">${s.count}</span>
+            </div>
+            <div style="height:7px;border-radius:var(--pill);background:var(--bg);overflow:hidden">
+              <div style="height:100%;width:${Math.round((s.count/maxStatus)*100)}%;background:${s.color};border-radius:var(--pill);transition:width .8s ease"></div>
+            </div>
+          </div>
+        `).join('')}
+      </div>
+    ` : '<div class="chart-empty">No entries yet</div>'}
   `;
 
   // Animate numeric stat values
