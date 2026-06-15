@@ -49,7 +49,6 @@ A personal tracker I built to keep my books and movies in one place. You can log
 | Frontend | Vanilla HTML, CSS, JavaScript |
 | Auth | [Supabase](https://supabase.com) |
 | Charts | [Chart.js v4](https://www.chartjs.org/) |
-| Fonts | Baloo 2 + Plus Jakarta Sans |
 | Database | [Supabase](https://supabase.com) (entries synced per user) |
 
 ---
