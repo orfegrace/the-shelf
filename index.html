@@ -1209,6 +1209,15 @@
     .podium-slot:hover .podium-name {
       text-shadow: 0 0 10px rgba(200,144,48,.45), 0 0 26px rgba(200,144,48,.18);
     }
+    .podium-name::after {
+      content: '🔍';
+      font-size: .5rem;
+      margin-left: 4px;
+      opacity: 0;
+      vertical-align: middle;
+      transition: opacity .2s;
+    }
+    .podium-name:hover::after { opacity: .55; }
     .genre-view-btns { display: flex; gap: 2px; background: var(--bg); border-radius: 6px; padding: 2px; }
     .genre-view-btn {
       width: 22px; height: 22px;
