@@ -1358,7 +1358,7 @@
 </div>
 
 <header>
-  <div class="logo"><span>The Shelf</span></div>
+  <div class="logo" id="logoBtn" style="cursor:pointer"><span>The Shelf</span></div>
   <nav>
     <button class="nav-btn active" data-view="library">Library</button>
     <button class="nav-btn"        data-view="dashboard">Stats</button>
@@ -1927,7 +1927,7 @@ function renderBoard() {
       <span style="font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.08em">Group by</span>
       <button class="board-group-btn ${S.boardGroup === 'rating' ? 'active' : ''}" data-g="rating">Rating</button>
       <button class="board-group-btn ${S.boardGroup === 'genre'  ? 'active' : ''}" data-g="genre">Genre</button>
-      <button class="board-group-btn ${S.boardGroup === 'year'   ? 'active' : ''}" data-g="year">Year Added</button>
+      <button class="board-group-btn ${S.boardGroup === 'year'   ? 'active' : ''}" data-g="year">Year Watched/Read</button>
     </div>`;
 
   const col = (entries, emptyMsg) => entries.length
@@ -1967,14 +1967,17 @@ function renderBoard() {
     boardHTML = makeBoard(groups, Math.min(groups.length, 3));
   } else {
     const yearMap = new Map();
-    [...list].sort((a, b) => (b.addedAt || 0) - (a.addedAt || 0)).forEach(e => {
-      const ts = e.addedAt && !isNaN(e.addedAt) ? e.addedAt : Date.now();
-      const yr = String(new Date(ts).getFullYear());
+    [...list].sort((a, b) => {
+      const ya = a.date ? a.date.slice(0,4) : '0';
+      const yb = b.date ? b.date.slice(0,4) : '0';
+      return Number(yb) - Number(ya);
+    }).forEach(e => {
+      const yr = e.date ? e.date.slice(0, 4) : 'No Date';
       if (!yearMap.has(yr)) yearMap.set(yr, []);
       yearMap.get(yr).push(e);
     });
     const groups = [...yearMap.entries()]
-      .sort((a, b) => Number(b[0]) - Number(a[0]))
+      .sort((a, b) => (b[0] === 'No Date' ? -1 : Number(b[0])) - (a[0] === 'No Date' ? -1 : Number(a[0])))
       .map(([yr, entries]) => [yr, entries, 'None']);
     boardHTML = makeBoard(groups, Math.min(groups.length, 4));
   }
@@ -2589,6 +2592,7 @@ function closeSidebar() {
   document.getElementById('sidebarBackdrop').classList.remove('open');
 }
 document.getElementById('sidebarBtn').addEventListener('click', openSidebar);
+document.getElementById('logoBtn').addEventListener('click', () => document.querySelector('.nav-btn[data-view="library"]').click());
 document.getElementById('closeSidebar').addEventListener('click', closeSidebar);
 document.getElementById('sidebarBackdrop').addEventListener('click', closeSidebar);
 
