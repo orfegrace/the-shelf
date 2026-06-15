@@ -15,8 +15,8 @@ A personal tracker I built to keep my books and movies in one place. You can log
 ### Library - Adding an Entry
 <img width="1440" height="715" alt="Screenshot 2026-06-14 at 11 10 20 AM" src="https://github.com/user-attachments/assets/fb950260-b9dc-4b1a-8dab-fdbea0d56585" />
 
-### Library - Entry card view
-<img width="1440" height="711" alt="Screenshot 2026-06-14 at 11 09 40 AM" src="https://github.com/user-attachments/assets/696bd05d-670f-4145-95be-a8c56981ab55" />
+### Library - Entry card view (Click on the title to search on Google)
+<img width="1440" height="710" alt="Screenshot 2026-06-15 at 11 41 54 AM" src="https://github.com/user-attachments/assets/a92ef7fa-be9b-40bd-8a00-333c9360e1f0" />
 
 ### Stats
 <img width="1440" height="753" alt="Screenshot 2026-06-14 at 11 36 46 AM" src="https://github.com/user-attachments/assets/aba7d709-7ac1-49e3-b5c5-97f13ced33d9" />
