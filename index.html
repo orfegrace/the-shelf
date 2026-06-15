@@ -446,7 +446,7 @@
     .fav-rc-title { font-weight: 700; font-size: .78rem; line-height: 1.4; color: var(--text); margin-bottom: 4px; }
     .fav-rc-meta  { font-size: .64rem; color: var(--muted); }
 
-    /* Empty state */
+    /* Empty stat e */
     .empty {
       position: absolute;
       inset: 0;
@@ -460,7 +460,7 @@
     .empty h3 { font-size: .82rem; font-weight: 600; margin-bottom: 4px; color: var(--text); }
     .empty p  { font-size: .72rem; }
 
-    /* Dashboard */
+    /* dashboard */
     .stats-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -1179,7 +1179,8 @@
     .status-row:hover .status-bar-fill { transform: scaleX(1.04); filter: brightness(1.08); }
     .status-count { transition: color .2s; }
     .status-row:hover .status-count { color: var(--text) !important; font-weight: 800 !important; }
-    .genre-row { display: flex; align-items: center; gap: 9px; }
+    .genre-row { display: flex; align-items: center; gap: 9px; border-radius: 8px; padding: 4px 6px; transition: background .2s; cursor: default; }
+    .genre-row:hover { background: rgba(0,0,0,.035); }
     .genre-swatch { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
     .genre-name { font-size: .8rem; font-weight: 600; color: var(--text); width: 80px; flex-shrink: 0; }
     .genre-bar-wrap { flex: 1; height: 7px; background: var(--bg); border-radius: 99px; overflow: hidden; }
@@ -2287,7 +2288,7 @@ function renderDashboard() {
           ${slots.map((c, i) => c ? `
             <div class="podium-slot">
               <div class="podium-medal">${medals[i]}</div>
-              <div class="podium-name" style="color:var(--text)">${c[0]}</div>
+              <div class="podium-name" style="color:var(--text);cursor:pointer" onclick="window.open('https://www.google.com/search?q='+encodeURIComponent('${c[0]}'),'_blank')">${c[0]}</div>
               <div style="font-size:.7rem;color:var(--muted);font-weight:600">${c[1]} ${c[1] === 1 ? 'entry' : 'entries'}</div>
               <div style="width:100%;height:${heights[i]};background:${bgColors[i]};border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.06)">
                 <span style="font-family:'Baloo 2',sans-serif;font-size:1.6rem;font-weight:800;color:var(--text);opacity:.18">${labels[i]}</span>
