@@ -31,6 +31,62 @@
       --r-sm:      10px;
       --pill:      999px;
     }
+    [data-theme="dark"] {
+      --bg:       #180f06;
+      --surface:  #201508;
+      --amber:    #d4833e;
+      --amber-lt: #3a2010;
+      --sage:     #6a9a66;
+      --sage-lt:  #1a3214;
+      --rose:     #c07060;
+      --rose-lt:  #3a1810;
+      --gold:     #d4a040;
+      --honey:    #5a4010;
+      --text:     #f0e0c8;
+      --muted:    #9a7850;
+      --border:   #3a2814;
+      --shadow:   4px 4px 0 rgba(0,0,0,.45);
+      --shadow-h: 6px 6px 0 rgba(0,0,0,.65);
+    }
+    [data-theme="dark"] .b-movie   { color: #e8a870; }
+    [data-theme="dark"] .b-book    { background: #1a2540; color: #8ab0e0; }
+    [data-theme="dark"] .b-done    { background: #1a2540; color: #8ab0e0; }
+    [data-theme="dark"] .b-want    { color: #e09080; }
+    [data-theme="dark"] .b-reading { color: #d0b060; }
+    [data-theme="dark"] .b-dnf     { color: #80b878; }
+    [data-theme="dark"] .b-genre   { color: #d0b060; }
+    [data-theme="dark"] .card-thumb-ph.book,
+    [data-theme="dark"] .fav-oc-ph.book,
+    [data-theme="dark"] .fav-rc-ph.book,
+    [data-theme="dark"] .det-cover-ph.book,
+    [data-theme="dark"] .tl-cover-ph.book,
+    [data-theme="dark"] .board-thumb-ph.book,
+    [data-theme="dark"] .list-thumb-ph.book,
+    [data-theme="dark"] .recent-chip-ph.book { background: linear-gradient(160deg, var(--sage-lt), #1e3a18); }
+    [data-theme="dark"] .fav-oc { background: #231508; }
+    [data-theme="dark"] .fav-rc { background: #291e08; }
+    [data-theme="dark"] .fav-oc::after {
+      background: linear-gradient(to bottom right, transparent 34%, rgba(0,0,0,.5) 41%, #2e1c0c 44%, #1e1408 100%);
+    }
+    [data-theme="dark"] .fav-rc::after {
+      background: linear-gradient(to bottom right, transparent 36%, rgba(60,40,10,.6) 43%, #3a2410 46%, #231408 100%);
+    }
+    [data-theme="dark"] select.sel {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239a7850' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    }
+    [data-theme="dark"] #mvbBookNum { color: var(--sage) !important; }
+    [data-theme="dark"] #mvbBarBook { background: var(--sage) !important; }
+    #themeToggle {
+      position: fixed; bottom: 20px; right: 20px; z-index: 9999;
+      width: 42px; height: 42px; border-radius: 50%; border: none;
+      background: rgba(90,52,18,.55); backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      color: #f0e0c8; font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 14px rgba(0,0,0,.22);
+      transition: background .2s, transform .15s;
+    }
+    #themeToggle:hover { background: rgba(90,52,18,.8); transform: scale(1.08); }
 
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
@@ -2106,17 +2162,17 @@ function renderDashboard() {
       </div>
       <div style="font-size:1rem;color:var(--border);font-weight:700;padding-bottom:8px">vs</div>
       <div id="mvbBookSide" style="text-align:center;flex:1;cursor:default">
-        <div class="mvb-num" id="mvbBookNum" style="font-family:'Baloo 2',sans-serif;font-size:2.2rem;font-weight:800;color:#5e8a5a">${bookCount}</div>
+        <div class="mvb-num" id="mvbBookNum" style="font-family:'Baloo 2',sans-serif;font-size:2.2rem;font-weight:800;color:var(--sage)">${bookCount}</div>
         <div style="font-size:.72rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Books</div>
       </div>
     </div>
     <div style="height:10px;border-radius:var(--pill);overflow:hidden;background:var(--bg);display:flex">
       <div id="mvbBarMovie" style="width:${moviePct}%;background:var(--amber);transition:width .5s ease"></div>
-      <div id="mvbBarBook"  style="width:${bookPct}%;background:#5e8a5a;transition:width .5s ease"></div>
+      <div id="mvbBarBook"  style="width:${bookPct}%;background:var(--sage);transition:width .5s ease"></div>
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:6px">
       <span style="font-size:.68rem;color:var(--amber);font-weight:700">${moviePct}%</span>
-      <span style="font-size:.68rem;color:#5e8a5a;font-weight:700">${bookPct}%</span>
+      <span style="font-size:.68rem;color:var(--sage);font-weight:700">${bookPct}%</span>
     </div>
   `;
 
@@ -2253,7 +2309,7 @@ function renderDashboard() {
           datasets: [{
             data: gEntries.map(([, c]) => c),
             backgroundColor: palette.slice(0, gEntries.length),
-            borderWidth: 3, borderColor: '#fffdf8', hoverOffset: 10,
+            borderWidth: 3, borderColor: getComputedStyle(document.documentElement).getPropertyValue('--surface').trim() || '#fffdf8', hoverOffset: 10,
           }]
         },
         plugins: [{
@@ -2268,7 +2324,7 @@ function renderDashboard() {
           maintainAspectRatio: false,
           animation: { animateRotate: true, duration: 900, easing: 'easeOutQuart' },
           plugins: {
-            legend: { position: 'bottom', align: 'start', labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' }, padding: 10, boxWidth: 10, boxHeight: 10, color: '#000000' } },
+            legend: { position: 'bottom', align: 'start', labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' }, padding: 10, boxWidth: 10, boxHeight: 10, color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#f0e0c8' : '#000000' } },
             tooltip: { callbacks: { label: ctx => `  ${ctx.label}: ${ctx.parsed}` } }
           }
         }
@@ -2812,5 +2868,25 @@ sb.auth.getSession().then(({ data: { session } }) => {
   else { showAuthScreen(); renderLibrary(); renderDashboard(); }
 });
 </script>
+  <button id="themeToggle" aria-label="Toggle dark mode">🌙</button>
+  <script>
+    (function() {
+      const btn = document.getElementById('themeToggle');
+      const apply = dark => {
+        document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+        btn.textContent = dark ? '☀️' : '🌙';
+      };
+      const saved = localStorage.getItem('shelf-theme');
+      apply(saved === 'dark');
+      btn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        apply(!isDark);
+        localStorage.setItem('shelf-theme', !isDark ? 'dark' : 'light');
+        if (document.getElementById('vDashboard')?.classList.contains('active')) {
+          if (typeof renderDashboard === 'function') renderDashboard();
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
