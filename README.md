@@ -96,6 +96,5 @@ index.html
 
 ---
 
----
 
-*Made by Grace Chang*
+*Made by orfegrace*
