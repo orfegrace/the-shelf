@@ -1775,6 +1775,13 @@ function toast(msg) {
 }
 
 // Helpers
+function creatorHTML(creator) {
+  if (!creator) return '';
+  return creator.split(',').map(a => a.trim()).filter(Boolean)
+    .map(a => `<span class="list-creator" onclick="event.stopPropagation();window.open('https://www.google.com/search?q='+encodeURIComponent('${a.replace(/'/g,"\\'")}'),'_blank')">${a}</span>`)
+    .join('<span style="color:var(--muted)"> · </span>');
+}
+
 function starsHTML(r, size = '.88rem') {
   let h = '<div class="stars">';
   for (let i = 1; i <= 5; i++)
@@ -2143,7 +2150,7 @@ function renderList() {
       <div class="list-info">
         <div class="list-title">${e.title}</div>
         <div class="list-meta">
-          ${e.creator ? e.creator.split(',').map(a => a.trim()).filter(Boolean).map(a => `<span class="list-creator" onclick="event.stopPropagation();window.open('https://www.google.com/search?q='+encodeURIComponent('${a.replace(/'/g,"\\'")}'),'_blank')">${a}</span>`).join('<span style="color:var(--muted)"> · </span>') : ''}
+          ${e.creator || ''}
           ${e.creator && e.year ? ' · ' : ''}${e.year || ''}
         </div>
       </div>
@@ -2594,7 +2601,7 @@ function openDetail(id) {
         ${e.genre ? `<span class="badge b-genre">${e.genre}</span>` : ''}
       </div>
       <div class="det-title" onclick="window.open('https://www.google.com/search?q='+encodeURIComponent('${e.title}'),'_blank')" title="Search on Google">${e.title}</div>
-      ${e.creator ? `<div class="det-meta">${cl}: <strong>${e.creator}</strong></div>` : ''}
+      ${e.creator ? `<div class="det-meta">${cl}: <strong>${creatorHTML(e.creator)}</strong></div>` : ''}
       ${e.year    ? `<div class="det-meta">Year: <strong>${e.year}</strong></div>` : ''}
       ${e.date    ? `<div class="det-meta">Date: <strong>${fmtDate(e.date)}</strong></div>` : ''}
       ${e.rating  ? starsHTML(e.rating, '1.35rem') : ''}
