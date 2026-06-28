@@ -182,7 +182,7 @@
       background: var(--surface);
       font-family: inherit; font-size: .72rem; font-weight: 600;
       color: var(--text); cursor: pointer; white-space: nowrap;
-      width: 122px; user-select: none;
+      width: 90px; user-select: none;
       transition: border-color .2s, box-shadow .2s;
     }
     .csel-trigger svg { flex-shrink: 0; transition: transform .2s; margin-left: auto; }
@@ -1519,7 +1519,7 @@
         <div class="csel-menu">
           <div class="csel-opt selected" data-val="all">All Status</div>
           <div class="csel-opt" data-val="done">Finished</div>
-          <div class="csel-opt" data-val="notdone">Didn't Finish</div>
+          <div class="csel-opt" data-val="notdone">Undone</div>
         </div>
       </div>
       <div class="csel" id="fRating" data-val="all">
@@ -1540,7 +1540,7 @@
           <div class="csel-opt selected" data-val="watched">Date</div>
           <div class="csel-opt" data-val="title">Title A–Z</div>
           <div class="csel-opt" data-val="rating">Rating</div>
-          <div class="csel-opt" data-val="year">Release Year</div>
+          <div class="csel-opt" data-val="year">Released</div>
         </div>
       </div>
       <button class="add-btn" id="addBtn"><span style="font-size:1.2rem;line-height:1">+</span> Add Entry</button>
