@@ -193,6 +193,7 @@
       box-sizing: border-box;
     }
     select.sel:focus { border-color: var(--amber); }
+    select.sel.active-filter { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(181,104,48,.18); }
     .add-btn {
       padding: 6px 16px;
       border-radius: var(--pill);
@@ -2684,10 +2685,20 @@ document.getElementById('cancelAdd').addEventListener('click', closeAdd);
 document.getElementById('saveBtn').addEventListener('click', saveEntry);
 // Filters
 document.getElementById('searchInput').addEventListener('input',  e => { S.filters.search      = e.target.value; renderLibrary(); });
-document.getElementById('fType').addEventListener('change',        e => { S.filters.type        = e.target.value; renderLibrary(); });
-document.getElementById('fStatus').addEventListener('change',      e => { S.filters.status      = e.target.value; renderLibrary(); });
-document.getElementById('fRating').addEventListener('change', e => { S.filters.rating = e.target.value; renderLibrary(); });
-document.getElementById('fSort').addEventListener('change',   e => { S.filters.sort   = e.target.value; renderLibrary(); });
+function markFilter(sel, defaultVal = 'all') {
+  sel.classList.toggle('active-filter', sel.value !== defaultVal);
+}
+['fType','fStatus','fRating'].forEach(id => {
+  const sel = document.getElementById(id);
+  sel.addEventListener('change', e => {
+    if (id === 'fType')   S.filters.type   = e.target.value;
+    if (id === 'fStatus') S.filters.status = e.target.value;
+    if (id === 'fRating') S.filters.rating = e.target.value;
+    markFilter(sel);
+    renderLibrary();
+  });
+});
+document.getElementById('fSort').addEventListener('change', e => { S.filters.sort = e.target.value; renderLibrary(); });
 
 // Sidebar
 function openSidebar() {
