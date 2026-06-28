@@ -2198,8 +2198,18 @@ function renderDashboard() {
   const bookPct    = 100 - moviePct;
 
   const creatorMap = {};
-  es.forEach(e => { if (e.creator) e.creator.split('/').forEach(c => { const name = c.trim(); if (name) creatorMap[name] = (creatorMap[name] || 0) + 1; }); });
-  const topCreators = Object.entries(creatorMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
+  const creatorLatest = {};
+  es.forEach(e => {
+    if (e.creator) e.creator.split('/').forEach(c => {
+      const name = c.trim();
+      if (!name) return;
+      creatorMap[name] = (creatorMap[name] || 0) + 1;
+      if (!creatorLatest[name] || (e.date && e.date > creatorLatest[name])) creatorLatest[name] = e.date || '';
+    });
+  });
+  const topCreators = Object.entries(creatorMap).sort((a, b) =>
+    b[1] !== a[1] ? b[1] - a[1] : (creatorLatest[b[0]] || '') > (creatorLatest[a[0]] || '') ? 1 : -1
+  ).slice(0, 3);
   const maxCreator  = topCreators[0]?.[1] || 1;
   const rankColors  = ['#f5d98a', '#e8e4dc', '#f0c4a0'];
   const rankLabels  = ['1st', '2nd', '3rd'];
