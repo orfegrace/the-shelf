@@ -180,9 +180,9 @@
       border-radius: var(--pill);
       border: 2px solid var(--border);
       background: var(--surface);
-      font-family: inherit; font-size: .8rem; font-weight: 600;
+      font-family: inherit; font-size: .72rem; font-weight: 600;
       color: var(--text); cursor: pointer; white-space: nowrap;
-      min-width: 96px; user-select: none;
+      width: 100px; overflow: hidden; user-select: none;
       transition: border-color .2s, box-shadow .2s;
     }
     .csel-trigger svg { flex-shrink: 0; transition: transform .2s; margin-left: auto; }
@@ -1507,7 +1507,7 @@
         <input id="searchInput" type="text" placeholder="Search title, creator, genre…" />
       </div>
       <div class="csel" id="fType" data-val="all">
-        <div class="csel-trigger">All Types<svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-trigger"><span style="flex:1;overflow:hidden;text-overflow:ellipsis">All Types</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
         <div class="csel-menu">
           <div class="csel-opt selected" data-val="all">All Types</div>
           <div class="csel-opt" data-val="movie">Movies</div>
@@ -1515,7 +1515,7 @@
         </div>
       </div>
       <div class="csel" id="fStatus" data-val="all">
-        <div class="csel-trigger">All Status<svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-trigger"><span style="flex:1;overflow:hidden;text-overflow:ellipsis">All Status</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
         <div class="csel-menu">
           <div class="csel-opt selected" data-val="all">All Status</div>
           <div class="csel-opt" data-val="done">Finished</div>
@@ -1523,7 +1523,7 @@
         </div>
       </div>
       <div class="csel" id="fRating" data-val="all">
-        <div class="csel-trigger">All Ratings<svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-trigger"><span style="flex:1;overflow:hidden;text-overflow:ellipsis">All Ratings</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
         <div class="csel-menu">
           <div class="csel-opt selected" data-val="all">All Ratings</div>
           <div class="csel-opt" data-val="5">★★★★★</div>
@@ -1535,11 +1535,11 @@
         </div>
       </div>
       <div class="csel" id="fSort" data-val="watched">
-        <div class="csel-trigger">Watched Date<svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-trigger"><span style="flex:1;overflow:hidden;text-overflow:ellipsis">Date</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
         <div class="csel-menu">
-          <div class="csel-opt selected" data-val="watched">Watched Date</div>
+          <div class="csel-opt selected" data-val="watched">Date</div>
           <div class="csel-opt" data-val="title">Title A–Z</div>
-          <div class="csel-opt" data-val="rating">Highest Rated</div>
+          <div class="csel-opt" data-val="rating">Rating</div>
           <div class="csel-opt" data-val="year">Release Year</div>
         </div>
       </div>
@@ -2420,9 +2420,9 @@ function renderDashboard() {
           ${slots.map((c, i) => c ? `
             <div class="podium-slot">
               <div class="podium-medal">${medals[i]}</div>
-              <div class="podium-name" style="color:var(--text);cursor:pointer" onclick="showCreatorList('${c[0].replace(/'/g,"\\'")}','${c[0].replace(/'/g,"\\'")}')">${c[0]}</div>
+              <div class="podium-name" style="color:var(--text);cursor:pointer" onclick="window.open('https://www.google.com/search?q='+encodeURIComponent('${c[0].replace(/'/g,"\\'")}'),'_blank')">${c[0]}</div>
               <div style="font-size:.7rem;color:var(--muted);font-weight:600">${c[1]} ${c[1] === 1 ? 'entry' : 'entries'}</div>
-              <div style="width:100%;height:${heights[i]};background:${bgColors[i]};border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.06)">
+              <div style="width:100%;height:${heights[i]};background:${bgColors[i]};border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.06);cursor:pointer" onclick="showCreatorList('${c[0].replace(/'/g,"\\'")}')">
                 <span style="font-family:'Baloo 2',sans-serif;font-size:1.6rem;font-weight:800;color:var(--text);opacity:.18">${labels[i]}</span>
               </div>
             </div>
@@ -2734,15 +2734,17 @@ document.getElementById('saveBtn').addEventListener('click', saveEntry);
 // Filters
 document.getElementById('searchInput').addEventListener('input',  e => { S.filters.search      = e.target.value; renderLibrary(); });
 const chevronSVG = `<svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>`;
+const cselDefaults = { fType: 'all', fStatus: 'all', fRating: 'all', fSort: 'watched' };
 function setCsel(id, val) {
   const el = document.getElementById(id);
   if (!el) return;
   const opt = el.querySelector(`.csel-opt[data-val="${val}"]`);
   if (!opt) return;
   el.dataset.val = val;
-  el.querySelector('.csel-trigger').innerHTML = opt.textContent + chevronSVG;
+  const trigger = el.querySelector('.csel-trigger');
+  trigger.innerHTML = `<span style="flex:1;overflow:hidden;text-overflow:ellipsis">${opt.textContent}</span>` + chevronSVG;
   el.querySelectorAll('.csel-opt').forEach(o => o.classList.toggle('selected', o === opt));
-  if (el.id !== 'fSort') el.classList.toggle('active-filter', val !== 'all');
+  el.classList.toggle('active-filter', val !== (cselDefaults[id] ?? 'all'));
 }
 document.querySelectorAll('.csel').forEach(el => {
   el.querySelector('.csel-trigger').addEventListener('click', e => {
