@@ -2200,7 +2200,7 @@ function renderDashboard() {
   const creatorMap = {};
   const creatorLatest = {};
   es.forEach(e => {
-    if (e.creator) e.creator.split('/').forEach(c => {
+    if (e.creator) e.creator.split(',').forEach(c => {
       const name = c.trim();
       if (!name) return;
       creatorMap[name] = (creatorMap[name] || 0) + 1;
@@ -2551,7 +2551,7 @@ function showCreatorList(name) {
     if (a.date) return -1; if (b.date) return 1;
     return a.title.localeCompare(b.title);
   });
-  const entries = byRecentOrAlpha(S.entries.filter(e => e.creator && e.creator.split('/').map(c => c.trim()).includes(name)));
+  const entries = byRecentOrAlpha(S.entries.filter(e => e.creator && e.creator.split(',').map(c => c.trim()).includes(name)));
   showStatList(name, entries);
 }
 
