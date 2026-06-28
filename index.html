@@ -1175,6 +1175,10 @@
     .list-info { flex: 1; min-width: 0; }
     .list-title { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .list-meta  { font-size: .76rem; color: var(--muted); margin-top: 2px; }
+    .list-creator { cursor: pointer; transition: color .15s; }
+    .list-creator::after { content: '🔍'; font-size: .55rem; margin-left: 3px; opacity: 0; vertical-align: middle; transition: opacity .2s; }
+    .list-creator:hover { color: var(--amber); }
+    .list-creator:hover::after { opacity: .55; }
     .list-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 
     /* Milestones */
@@ -2138,7 +2142,10 @@ function renderList() {
       ${thumb}
       <div class="list-info">
         <div class="list-title">${e.title}</div>
-        <div class="list-meta">${[e.creator, e.year].filter(Boolean).join(' · ')}</div>
+        <div class="list-meta">
+          ${e.creator ? e.creator.split(',').map(a => a.trim()).filter(Boolean).map(a => `<span class="list-creator" onclick="event.stopPropagation();window.open('https://www.google.com/search?q='+encodeURIComponent('${a.replace(/'/g,"\\'")}'),'_blank')">${a}</span>`).join('<span style="color:var(--muted)"> · </span>') : ''}
+          ${e.creator && e.year ? ' · ' : ''}${e.year || ''}
+        </div>
       </div>
       <div class="list-right">
         ${e.genre ? `<span class="badge b-genre">${e.genre}</span>` : ''}
