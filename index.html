@@ -533,6 +533,7 @@
       gap: 6px;
       min-height: 110px;
       transition: transform .2s ease, box-shadow .2s ease;
+      cursor: pointer;
     }
     .stat-card:hover {
       transform: translateY(-4px) scale(1.02);
@@ -552,6 +553,15 @@
     }
     .stat-val   { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 2rem; font-weight: 700; }
     .stat-label { font-size: .82rem; font-weight: 600; color: var(--muted); margin-top: auto; }
+    .stat-list-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 9px 12px; border-radius: var(--r-sm);
+      background: var(--bg); cursor: pointer;
+      transition: background .15s;
+      font-size: .9rem; font-weight: 600; color: var(--text);
+    }
+    .stat-list-row:hover { background: var(--amber-lt); }
+    .stat-list-row .slr-meta { font-size: .75rem; font-weight: 500; color: var(--muted); margin-left: auto; white-space: nowrap; }
     .sec-title  { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 14px; }
     .dash-recent { display: flex; flex-direction: column; }
     .recent-strip {
@@ -1660,6 +1670,14 @@
   <div class="modal" id="detContent" style="position:relative"></div>
 </div>
 
+<div class="overlay" id="statListOverlay">
+  <div class="modal" id="statListContent" style="position:relative;max-height:80vh;display:flex;flex-direction:column;padding:24px;gap:0">
+    <button class="close-btn" id="closeStatList" style="position:absolute;top:12px;right:12px;z-index:10;background:rgba(255,255,255,0.18)">✕</button>
+    <div id="statListTitle" style="font-family:'Plus Jakarta Sans',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:16px;padding-right:32px"></div>
+    <div id="statListBody" style="overflow-y:auto;display:flex;flex-direction:column;gap:6px"></div>
+  </div>
+</div>
+
 <!-- Sidebar -->
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 <div class="sidebar" id="sidebar">
@@ -2123,21 +2141,28 @@ function renderDashboard() {
   const topGenre = Object.entries(gc).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
 
   const statsData = [
-    { icon: 'Film',  val: watched,   label: 'Movies Watched', isNum: true },
-    { icon: 'Avg',   val: avg,       label: 'Rating',         isNum: avg !== '—' },
-    { icon: 'Genre', val: topGenre,  label: 'Top Genre',      isNum: false, small: false },
-    { icon: 'Books', val: read,      label: 'Books Read',     isNum: true },
-    { icon: 'List',  val: wantCt,    label: 'On Watchlist',   isNum: true },
-    { icon: 'All',   val: es.length, label: 'Total Entries',  isNum: true },
+    { icon: 'Film',  val: watched,   label: 'Movies Watched', isNum: true,  entries: () => es.filter(e => e.type === 'movie' && e.status === 'done') },
+    { icon: 'Avg',   val: avg,       label: 'Rating',         isNum: avg !== '—', entries: () => es.filter(e => e.rating).sort((a,b) => b.rating - a.rating) },
+    { icon: 'Genre', val: topGenre,  label: 'Top Genre',      isNum: false, entries: () => es.filter(e => e.genre === topGenre) },
+    { icon: 'Books', val: read,      label: 'Books Read',     isNum: true,  entries: () => es.filter(e => e.type === 'book' && e.status === 'done') },
+    { icon: 'List',  val: wantCt,    label: 'On Watchlist',   isNum: true,  entries: () => es.filter(e => e.status === 'want') },
+    { icon: 'All',   val: es.length, label: 'Total Entries',  isNum: true,  entries: () => [...es].sort((a,b) => b.addedAt - a.addedAt) },
   ];
 
   document.getElementById('statsGrid').innerHTML = statsData.map((s, i) => `
-    <div class="stat-card anim" style="animation-delay:${i * 70}ms">
+    <div class="stat-card anim" data-stat="${i}" style="animation-delay:${i * 70}ms">
       <div class="stat-icon">${s.icon}</div>
       <div class="stat-val anim" data-target="${s.isNum ? s.val : ''}" style="${s.small ? 'font-size:1.35rem;' : ''}animation-delay:${i * 70 + 120}ms">${s.val}</div>
       <div class="stat-label">${s.label}</div>
     </div>
   `).join('');
+
+  document.querySelectorAll('#statsGrid .stat-card').forEach(card => {
+    card.addEventListener('click', () => {
+      const s = statsData[+card.dataset.stat];
+      if (s) showStatList(s.label, s.entries());
+    });
+  });
 
   // Movies vs Books split + Top Creators
   const movieCount = es.filter(e => e.type === 'movie').length;
@@ -2453,6 +2478,20 @@ function renderFavorites() {
   }
 }
 
+// Stat list modal
+function showStatList(title, entries) {
+  document.getElementById('statListTitle').textContent = `${title} (${entries.length})`;
+  document.getElementById('statListBody').innerHTML = entries.length
+    ? entries.map(e => `
+        <div class="stat-list-row" onclick="document.getElementById('statListOverlay').classList.remove('open');openDetail('${e.id}')">
+          <span class="badge ${e.type === 'movie' ? 'b-movie' : 'b-book'}" style="flex-shrink:0">${e.type === 'movie' ? 'Movie' : 'Book'}</span>
+          <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${e.title}</span>
+          ${e.rating ? `<span class="slr-meta">${'★'.repeat(e.rating)}</span>` : ''}
+        </div>`).join('')
+    : '<div style="color:var(--muted);font-size:.9rem;padding:8px 12px">Nothing here yet.</div>';
+  document.getElementById('statListOverlay').classList.add('open');
+}
+
 // Detail modal
 function openDetail(id) {
   const e = S.entries.find(x => x.id === id);
@@ -2681,7 +2720,8 @@ document.getElementById('sidebarSignOut').addEventListener('click', () => {
 });
 
 // Close overlays on backdrop click
-['addOverlay','detOverlay'].forEach(id => {
+document.getElementById('closeStatList').addEventListener('click', () => document.getElementById('statListOverlay').classList.remove('open'));
+['addOverlay','detOverlay','statListOverlay'].forEach(id => {
   document.getElementById(id).addEventListener('click', e => {
     if (e.target.id === id) document.getElementById(id).classList.remove('open');
   });
