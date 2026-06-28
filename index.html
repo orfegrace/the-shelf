@@ -71,9 +71,6 @@
     [data-theme="dark"] .fav-rc::after {
       background: linear-gradient(to bottom right, transparent 36%, rgba(60,40,10,.6) 43%, #3a2410 46%, #231408 100%);
     }
-    [data-theme="dark"] select.sel {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%239a7850' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-    }
     [data-theme="dark"] #mvbBookNum { color: var(--sage) !important; }
     [data-theme="dark"] #mvbBarBook { background: var(--sage) !important; }
     #themeToggle {
@@ -176,24 +173,36 @@
       transition: border-color .2s;
     }
     .search-wrap input:focus { border-color: var(--amber); }
-    select.sel {
-      width: 96px;
-      padding: 6px 28px 6px 12px;
+    .csel { position: relative; display: inline-block; font-size: .8rem; }
+    .csel-trigger {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 10px 6px 12px;
       border-radius: var(--pill);
       border: 2px solid var(--border);
-      background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%237a5c40' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center;
-      appearance: none;
-      -webkit-appearance: none;
-      font-family: inherit;
-      font-size: .8rem;
-      color: var(--text);
-      outline: none;
-      cursor: pointer;
-      transition: border-color .2s;
-      box-sizing: border-box;
+      background: var(--surface);
+      font-family: inherit; font-size: .8rem; font-weight: 600;
+      color: var(--text); cursor: pointer; white-space: nowrap;
+      min-width: 96px; user-select: none;
+      transition: border-color .2s, box-shadow .2s;
     }
-    select.sel:focus { border-color: var(--amber); }
-    select.sel.active-filter { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(181,104,48,.18); }
+    .csel-trigger svg { flex-shrink: 0; transition: transform .2s; margin-left: auto; }
+    .csel.open .csel-trigger svg { transform: rotate(180deg); }
+    .csel.open .csel-trigger, .csel-trigger:hover { border-color: var(--amber); }
+    .csel.active-filter .csel-trigger { border-color: var(--amber); box-shadow: 0 0 0 2px rgba(181,104,48,.18); }
+    .csel-menu {
+      position: absolute; top: calc(100% + 5px); left: 0;
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: var(--r-sm);
+      z-index: 300; min-width: 100%; display: none; flex-direction: column; overflow: hidden;
+    }
+    .csel.open .csel-menu { display: flex; }
+    .csel-opt {
+      padding: 8px 14px; font-family: inherit; font-size: .82rem; font-weight: 600;
+      color: var(--text); cursor: pointer; white-space: nowrap;
+      transition: background .12s, color .12s;
+    }
+    .csel-opt:hover { background: var(--amber-lt); color: var(--amber); }
+    .csel-opt.selected { color: var(--amber); }
     .add-btn {
       padding: 6px 16px;
       border-radius: var(--pill);
@@ -1243,7 +1252,7 @@
       padding: 40px 0;
     }
     .genre-list { display: flex; flex-direction: column; justify-content: space-evenly; height: 100%; }
-    .status-row { border-radius: 8px; padding: 5px 7px; transition: background .2s; cursor: default; }
+    .status-row { border-radius: 8px; padding: 5px 7px; transition: background .2s; cursor: pointer; }
     .status-row:hover { background: rgba(0,0,0,.035); }
     .status-bar-fill { transform-origin: left center; transition: transform .35s ease, filter .35s ease; }
     .status-row:hover .status-bar-fill { transform: scaleX(1.04); filter: brightness(1.08); }
@@ -1497,31 +1506,43 @@
       <div class="search-wrap">
         <input id="searchInput" type="text" placeholder="Search title, creator, genre…" />
       </div>
-      <select class="sel" id="fType">
-        <option value="all">All Types</option>
-        <option value="movie">Movies</option>
-        <option value="book">Books</option>
-      </select>
-      <select class="sel" id="fStatus">
-        <option value="all">All Status</option>
-        <option value="done">Finished</option>
-        <option value="notdone">Didn't Finish</option>
-      </select>
-      <select class="sel" id="fRating">
-        <option value="all">All Ratings</option>
-        <option value="5">★★★★★</option>
-        <option value="4">★★★★</option>
-        <option value="3">★★★</option>
-        <option value="2">★★</option>
-        <option value="1">★</option>
-        <option value="0">Not Rated</option>
-      </select>
-      <select class="sel" id="fSort">
-        <option value="watched">Date</option>
-        <option value="title">Title A–Z</option>
-        <option value="rating">Highest Rated</option>
-        <option value="year">Release Year</option>
-      </select>
+      <div class="csel" id="fType" data-val="all">
+        <div class="csel-trigger">All Types<svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-menu">
+          <div class="csel-opt selected" data-val="all">All Types</div>
+          <div class="csel-opt" data-val="movie">Movies</div>
+          <div class="csel-opt" data-val="book">Books</div>
+        </div>
+      </div>
+      <div class="csel" id="fStatus" data-val="all">
+        <div class="csel-trigger">All Status<svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-menu">
+          <div class="csel-opt selected" data-val="all">All Status</div>
+          <div class="csel-opt" data-val="done">Finished</div>
+          <div class="csel-opt" data-val="notdone">Didn't Finish</div>
+        </div>
+      </div>
+      <div class="csel" id="fRating" data-val="all">
+        <div class="csel-trigger">All Ratings<svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-menu">
+          <div class="csel-opt selected" data-val="all">All Ratings</div>
+          <div class="csel-opt" data-val="5">★★★★★</div>
+          <div class="csel-opt" data-val="4">★★★★</div>
+          <div class="csel-opt" data-val="3">★★★</div>
+          <div class="csel-opt" data-val="2">★★</div>
+          <div class="csel-opt" data-val="1">★</div>
+          <div class="csel-opt" data-val="0">Not Rated</div>
+        </div>
+      </div>
+      <div class="csel" id="fSort" data-val="watched">
+        <div class="csel-trigger">Watched Date<svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-menu">
+          <div class="csel-opt selected" data-val="watched">Watched Date</div>
+          <div class="csel-opt" data-val="title">Title A–Z</div>
+          <div class="csel-opt" data-val="rating">Highest Rated</div>
+          <div class="csel-opt" data-val="year">Release Year</div>
+        </div>
+      </div>
       <button class="add-btn" id="addBtn"><span style="font-size:1.2rem;line-height:1">+</span> Add Entry</button>
     </div>
 
@@ -1931,7 +1952,7 @@ function renderTable() {
 
   vc.querySelectorAll('th.sortable').forEach(th => th.addEventListener('click', () => {
     S.filters.sort = th.dataset.sort;
-    document.getElementById('fSort').value = th.dataset.sort;
+    setCsel('fSort', th.dataset.sort);
     renderLibrary();
   }));
   vc.querySelectorAll('tr[data-id]').forEach(r => r.addEventListener('click', () => openDetail(r.dataset.id)));
@@ -2246,7 +2267,7 @@ function renderDashboard() {
     ${statusCounts.length ? `
       <div style="display:flex;flex-direction:column;gap:12px;margin-top:14px">
         ${statusCounts.map(s => `
-          <div class="status-row">
+          <div class="status-row" data-status-key="${s.key}">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
               <span style="font-size:.82rem;font-weight:600;color:var(--text)">${s.label}</span>
               <span class="status-count" style="font-size:.75rem;font-weight:700;color:var(--muted)">${s.count}</span>
@@ -2259,6 +2280,23 @@ function renderDashboard() {
       </div>
     ` : '<div class="chart-empty">No entries yet</div>'}
   `;
+
+  // Status breakdown click → list modal
+  const byRecentOrAlpha = arr => [...arr].sort((a, b) => {
+    if (a.date && b.date) return a.date > b.date ? -1 : a.date < b.date ? 1 : 0;
+    if (a.date) return -1;
+    if (b.date) return 1;
+    return a.title.localeCompare(b.title);
+  });
+  document.querySelectorAll('#statusCard .status-row').forEach(row => {
+    row.addEventListener('click', () => {
+      const key = row.dataset.statusKey;
+      const matched = statuses.find(s => s.key === key);
+      if (!matched) return;
+      const entries = byRecentOrAlpha(es.filter(e => key === 'want' ? (!e.status || e.status === 'want') : e.status === key));
+      showStatList(matched.label, entries);
+    });
+  });
 
   // Animate numeric stat values
   document.querySelectorAll('#statsGrid .stat-val[data-target]').forEach(el => {
@@ -2382,7 +2420,7 @@ function renderDashboard() {
           ${slots.map((c, i) => c ? `
             <div class="podium-slot">
               <div class="podium-medal">${medals[i]}</div>
-              <div class="podium-name" style="color:var(--text);cursor:pointer" onclick="window.open('https://www.google.com/search?q='+encodeURIComponent('${c[0]}'),'_blank')">${c[0]}</div>
+              <div class="podium-name" style="color:var(--text);cursor:pointer" onclick="showCreatorList('${c[0].replace(/'/g,"\\'")}','${c[0].replace(/'/g,"\\'")}')">${c[0]}</div>
               <div style="font-size:.7rem;color:var(--muted);font-weight:600">${c[1]} ${c[1] === 1 ? 'entry' : 'entries'}</div>
               <div style="width:100%;height:${heights[i]};background:${bgColors[i]};border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.06)">
                 <span style="font-family:'Baloo 2',sans-serif;font-size:1.6rem;font-weight:800;color:var(--text);opacity:.18">${labels[i]}</span>
@@ -2491,6 +2529,16 @@ function showStatList(title, entries) {
         </div>`).join('')
     : '<div style="color:var(--muted);font-size:.9rem;padding:8px 12px">Nothing here yet.</div>';
   document.getElementById('statListOverlay').classList.add('open');
+}
+
+function showCreatorList(name) {
+  const byRecentOrAlpha = arr => [...arr].sort((a, b) => {
+    if (a.date && b.date) return a.date > b.date ? -1 : a.date < b.date ? 1 : 0;
+    if (a.date) return -1; if (b.date) return 1;
+    return a.title.localeCompare(b.title);
+  });
+  const entries = byRecentOrAlpha(S.entries.filter(e => e.creator && e.creator.split('/').map(c => c.trim()).includes(name)));
+  showStatList(name, entries);
 }
 
 // Detail modal
@@ -2685,20 +2733,38 @@ document.getElementById('cancelAdd').addEventListener('click', closeAdd);
 document.getElementById('saveBtn').addEventListener('click', saveEntry);
 // Filters
 document.getElementById('searchInput').addEventListener('input',  e => { S.filters.search      = e.target.value; renderLibrary(); });
-function markFilter(sel, defaultVal = 'all') {
-  sel.classList.toggle('active-filter', sel.value !== defaultVal);
+const chevronSVG = `<svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg>`;
+function setCsel(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const opt = el.querySelector(`.csel-opt[data-val="${val}"]`);
+  if (!opt) return;
+  el.dataset.val = val;
+  el.querySelector('.csel-trigger').innerHTML = opt.textContent + chevronSVG;
+  el.querySelectorAll('.csel-opt').forEach(o => o.classList.toggle('selected', o === opt));
+  if (el.id !== 'fSort') el.classList.toggle('active-filter', val !== 'all');
 }
-['fType','fStatus','fRating'].forEach(id => {
-  const sel = document.getElementById(id);
-  sel.addEventListener('change', e => {
-    if (id === 'fType')   S.filters.type   = e.target.value;
-    if (id === 'fStatus') S.filters.status = e.target.value;
-    if (id === 'fRating') S.filters.rating = e.target.value;
-    markFilter(sel);
-    renderLibrary();
+document.querySelectorAll('.csel').forEach(el => {
+  el.querySelector('.csel-trigger').addEventListener('click', e => {
+    e.stopPropagation();
+    document.querySelectorAll('.csel.open').forEach(c => { if (c !== el) c.classList.remove('open'); });
+    el.classList.toggle('open');
+  });
+  el.querySelectorAll('.csel-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      const val = opt.dataset.val;
+      setCsel(el.id, val);
+      el.classList.remove('open');
+      const id = el.id;
+      if (id === 'fType')   S.filters.type   = val;
+      if (id === 'fStatus') S.filters.status = val;
+      if (id === 'fRating') S.filters.rating = val;
+      if (id === 'fSort')   S.filters.sort   = val;
+      renderLibrary();
+    });
   });
 });
-document.getElementById('fSort').addEventListener('change', e => { S.filters.sort = e.target.value; renderLibrary(); });
+document.addEventListener('click', () => document.querySelectorAll('.csel.open').forEach(c => c.classList.remove('open')));
 
 // Sidebar
 function openSidebar() {
