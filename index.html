@@ -1504,9 +1504,7 @@
       <select class="sel" id="fStatus">
         <option value="all">All Status</option>
         <option value="done">Finished</option>
-        <option value="reading">In Progress</option>
-        <option value="dnf">Did Not Finish</option>
-        <option value="want">Not Started</option>
+        <option value="notdone">Didn't Finish</option>
       </select>
       <select class="sel" id="fRating">
         <option value="all">All Ratings</option>
@@ -1782,7 +1780,8 @@ function getFiltered() {
   let list = [...S.entries];
   const { type, status, search, sort, rating } = S.filters;
   if (type   !== 'all') list = list.filter(e => e.type   === type);
-  if (status !== 'all') list = list.filter(e => e.status === status);
+  if (status === 'notdone') list = list.filter(e => e.status !== 'done');
+  else if (status !== 'all') list = list.filter(e => e.status === status);
   if (rating !== 'all') {
     if (rating === '0') list = list.filter(e => !e.rating);
     else list = list.filter(e => e.rating === +rating);
