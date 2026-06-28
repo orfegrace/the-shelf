@@ -1518,7 +1518,7 @@
         <div class="csel-trigger"><span>All Status</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
         <div class="csel-menu">
           <div class="csel-opt selected" data-val="all">All Status</div>
-          <div class="csel-opt" data-val="done">Finished</div>
+          <div class="csel-opt" data-val="done">Done</div>
           <div class="csel-opt" data-val="notdone">Undone</div>
         </div>
       </div>
@@ -1646,7 +1646,7 @@
           <select class="fsel" id="fStatus2">
             <option value="done">Finished</option>
             <option value="reading">In Progress</option>
-            <option value="dnf">Did Not Finish</option>
+            <option value="dnf">Skipped</option>
             <option value="want">Not Started</option>
           </select>
         </div>
@@ -1793,7 +1793,7 @@ function thumbHTML(e, forCard = true) {
 function statusBadge(e) {
   if (e.status === 'done')    return `<span class="badge b-done">Finished</span>`;
   if (e.status === 'reading') return `<span class="badge b-reading">In Progress</span>`;
-  if (e.status === 'dnf')     return `<span class="badge b-dnf">Did Not Finish</span>`;
+  if (e.status === 'dnf')     return `<span class="badge b-dnf">Skipped</span>`;
   return `<span class="badge b-want">Not Started</span>`;
 }
 
@@ -1802,8 +1802,8 @@ function getFiltered() {
   let list = [...S.entries];
   const { type, status, search, sort, rating } = S.filters;
   if (type   !== 'all') list = list.filter(e => e.type   === type);
-  if (status === 'notdone') list = list.filter(e => e.status !== 'done');
-  else if (status !== 'all') list = list.filter(e => e.status === status);
+  if (status === 'done')    list = list.filter(e => e.status === 'done' || e.status === 'dnf');
+  else if (status === 'notdone') list = list.filter(e => e.status === 'reading' || e.status === 'want' || !e.status);
   if (rating !== 'all') {
     if (rating === '0') list = list.filter(e => !e.rating);
     else list = list.filter(e => e.rating === +rating);
@@ -2253,7 +2253,7 @@ function renderDashboard() {
   const statuses = [
     { key: 'done',    label: 'Finished',      color: '#b8d9b4' },
     { key: 'reading', label: 'In Progress',   color: '#f2dca0' },
-    { key: 'dnf',     label: 'Did Not Finish',color: '#f2bab4' },
+    { key: 'dnf',     label: 'Skipped',color: '#f2bab4' },
     { key: 'want',    label: 'Not Started',   color: '#b8ccf0' },
   ];
   const statusCounts = statuses.map(s => ({
@@ -2633,7 +2633,7 @@ function setType(type) {
   document.getElementById('fStatus2').innerHTML =
     '<option value="done">Finished</option>' +
     '<option value="reading">In Progress</option>' +
-    '<option value="dnf">Did Not Finish</option>' +
+    '<option value="dnf">Skipped</option>' +
     '<option value="want">Not Started</option>';
 }
 
