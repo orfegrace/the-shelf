@@ -2140,13 +2140,14 @@ function renderDashboard() {
   es.forEach(e => { if (e.genre) gc[e.genre] = (gc[e.genre] || 0) + 1; });
   const topGenre = Object.entries(gc).sort((a, b) => b[1] - a[1])[0]?.[0] || '—';
 
+  const byRecent = arr => [...arr].sort((a, b) => (b.date || '') > (a.date || '') ? 1 : (b.date || '') < (a.date || '') ? -1 : b.addedAt - a.addedAt);
   const statsData = [
-    { icon: 'Film',  val: watched,   label: 'Movies Watched', isNum: true,  entries: () => es.filter(e => e.type === 'movie' && e.status === 'done') },
-    { icon: 'Avg',   val: avg,       label: 'Rating',         isNum: avg !== '—', entries: () => es.filter(e => e.rating).sort((a,b) => b.rating - a.rating) },
-    { icon: 'Genre', val: topGenre,  label: 'Top Genre',      isNum: false, entries: () => es.filter(e => e.genre === topGenre) },
-    { icon: 'Books', val: read,      label: 'Books Read',     isNum: true,  entries: () => es.filter(e => e.type === 'book' && e.status === 'done') },
-    { icon: 'List',  val: wantCt,    label: 'On Watchlist',   isNum: true,  entries: () => es.filter(e => e.status === 'want') },
-    { icon: 'All',   val: es.length, label: 'Total Entries',  isNum: true,  entries: () => [...es].sort((a,b) => b.addedAt - a.addedAt) },
+    { icon: 'Film',  val: watched,   label: 'Movies Watched', isNum: true,  entries: () => byRecent(es.filter(e => e.type === 'movie' && e.status === 'done')) },
+    { icon: 'Avg',   val: avg,       label: 'Rating',         isNum: avg !== '—', entries: () => byRecent(es.filter(e => e.rating)) },
+    { icon: 'Genre', val: topGenre,  label: 'Top Genre',      isNum: false, entries: () => byRecent(es.filter(e => e.genre === topGenre)) },
+    { icon: 'Books', val: read,      label: 'Books Read',     isNum: true,  entries: () => byRecent(es.filter(e => e.type === 'book' && e.status === 'done')) },
+    { icon: 'List',  val: wantCt,    label: 'On Watchlist',   isNum: true,  entries: () => byRecent(es.filter(e => e.status === 'want')) },
+    { icon: 'All',   val: es.length, label: 'Total Entries',  isNum: true,  entries: () => byRecent(es) },
   ];
 
   document.getElementById('statsGrid').innerHTML = statsData.map((s, i) => `
