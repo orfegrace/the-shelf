@@ -1777,9 +1777,9 @@ function toast(msg) {
 // Helpers
 function creatorHTML(creator) {
   if (!creator) return '';
-  return creator.split(',').map(a => a.trim()).filter(Boolean)
-    .map(a => `<span class="list-creator" onclick="event.stopPropagation();window.open('https://www.google.com/search?q='+encodeURIComponent('${a.replace(/'/g,"\\'")}'),'_blank')">${a}</span>`)
-    .join('<span style="color:var(--muted)"> · </span>');
+  const authors = creator.split(',').map(a => a.trim()).filter(Boolean);
+  const spans = authors.map(a => `<span class="list-creator" onclick="event.stopPropagation();window.open('https://www.google.com/search?q='+encodeURIComponent('${a.replace(/'/g,"\\'")}'),'_blank')">${a}</span>`);
+  return `<span style="display:inline-flex;gap:5px;flex-wrap:wrap;align-items:center">${spans.join('')}</span>`;
 }
 
 function starsHTML(r, size = '.88rem') {
