@@ -2147,7 +2147,7 @@ function renderDashboard() {
   const bookPct    = 100 - moviePct;
 
   const creatorMap = {};
-  es.forEach(e => { if (e.creator) creatorMap[e.creator] = (creatorMap[e.creator] || 0) + 1; });
+  es.forEach(e => { if (e.creator) e.creator.split('/').forEach(c => { const name = c.trim(); if (name) creatorMap[name] = (creatorMap[name] || 0) + 1; }); });
   const topCreators = Object.entries(creatorMap).sort((a, b) => b[1] - a[1]).slice(0, 3);
   const maxCreator  = topCreators[0]?.[1] || 1;
   const rankColors  = ['#f5d98a', '#e8e4dc', '#f0c4a0'];
