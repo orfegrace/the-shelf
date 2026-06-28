@@ -182,7 +182,7 @@
       background: var(--surface);
       font-family: inherit; font-size: .72rem; font-weight: 600;
       color: var(--text); cursor: pointer; white-space: nowrap;
-      width: 100px; overflow: hidden; user-select: none;
+      width: 122px; user-select: none;
       transition: border-color .2s, box-shadow .2s;
     }
     .csel-trigger svg { flex-shrink: 0; transition: transform .2s; margin-left: auto; }
@@ -1507,7 +1507,7 @@
         <input id="searchInput" type="text" placeholder="Search title, creator, genre…" />
       </div>
       <div class="csel" id="fType" data-val="all">
-        <div class="csel-trigger"><span style="flex:1;overflow:hidden;text-overflow:ellipsis">All Types</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-trigger"><span>All Types</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
         <div class="csel-menu">
           <div class="csel-opt selected" data-val="all">All Types</div>
           <div class="csel-opt" data-val="movie">Movies</div>
@@ -1515,7 +1515,7 @@
         </div>
       </div>
       <div class="csel" id="fStatus" data-val="all">
-        <div class="csel-trigger"><span style="flex:1;overflow:hidden;text-overflow:ellipsis">All Status</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-trigger"><span>All Status</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
         <div class="csel-menu">
           <div class="csel-opt selected" data-val="all">All Status</div>
           <div class="csel-opt" data-val="done">Finished</div>
@@ -1523,7 +1523,7 @@
         </div>
       </div>
       <div class="csel" id="fRating" data-val="all">
-        <div class="csel-trigger"><span style="flex:1;overflow:hidden;text-overflow:ellipsis">All Ratings</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-trigger"><span>All Ratings</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
         <div class="csel-menu">
           <div class="csel-opt selected" data-val="all">All Ratings</div>
           <div class="csel-opt" data-val="5">★★★★★</div>
@@ -1535,7 +1535,7 @@
         </div>
       </div>
       <div class="csel" id="fSort" data-val="watched">
-        <div class="csel-trigger"><span style="flex:1;overflow:hidden;text-overflow:ellipsis">Date</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+        <div class="csel-trigger"><span>Date</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
         <div class="csel-menu">
           <div class="csel-opt selected" data-val="watched">Date</div>
           <div class="csel-opt" data-val="title">Title A–Z</div>
@@ -2742,7 +2742,7 @@ function setCsel(id, val) {
   if (!opt) return;
   el.dataset.val = val;
   const trigger = el.querySelector('.csel-trigger');
-  trigger.innerHTML = `<span style="flex:1;overflow:hidden;text-overflow:ellipsis">${opt.textContent}</span>` + chevronSVG;
+  trigger.innerHTML = `<span>${opt.textContent}</span>` + chevronSVG;
   el.querySelectorAll('.csel-opt').forEach(o => o.classList.toggle('selected', o === opt));
   el.classList.toggle('active-filter', val !== (cselDefaults[id] ?? 'all'));
 }
