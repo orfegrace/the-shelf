@@ -1821,6 +1821,10 @@ function getFiltered() {
     if (sort === 'rating')  return (b.rating || 0) - (a.rating || 0);
     if (sort === 'year')    return (b.year   || 0) - (a.year   || 0);
     if (sort === 'watched') {
+      const undone = s => s === 'reading' || s === 'want' || !s;
+      const aUndone = undone(a.status) ? 0 : 1;
+      const bUndone = undone(b.status) ? 0 : 1;
+      if (aUndone !== bUndone) return aUndone - bUndone;
       const da = a.date ? new Date(a.date).getTime() : 0;
       const db = b.date ? new Date(b.date).getTime() : 0;
       return db - da;
