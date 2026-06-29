@@ -1245,18 +1245,19 @@
       background: linear-gradient(to bottom, #4e2e12 0%, #3a2009 100%);
       width: 100%; box-sizing: border-box;
     }
-    .spine-row { margin-bottom: 24px; display: flex; flex-direction: column; width: 100%; }
+    .spine-row { margin-bottom: 24px; display: flex; flex-direction: column; width: 100%; box-sizing: border-box; }
     .spine-shelf {
       display: flex; align-items: flex-end; justify-content: center; gap: 2px;
-      padding: 28px 24px 0; flex-wrap: nowrap;
+      padding: 28px 72px 0; flex-wrap: nowrap;
       min-height: 220px; overflow: visible;
     }
     .spine-row-last { margin-bottom: 0; }
     .spine-row-last .spine-shelf { justify-content: flex-start; }
     .spine-shelf-plank {
-      height: 18px; width: 100%;
+      height: 18px; width: 100%; min-width: 100%; align-self: stretch;
       background: linear-gradient(to bottom, #7a4e1e 0%, #5a3610 60%, #3e2208 100%);
       box-shadow: 0 4px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,200,100,.15);
+      box-sizing: border-box;
     }
     .spine-book {
       flex: 0 0 40px; width: 40px;
@@ -1276,6 +1277,19 @@
     .spine-book:hover { transform: rotate(var(--rot)) translateY(-14px); z-index: 10; }
     .spine-book.spine-flat { transform-origin: bottom left; z-index: 0; }
     .spine-book.spine-flat:hover { transform: rotate(90deg) translateY(-8px); }
+    .spine-flat-label {
+      position: absolute; inset: 0; display: flex; align-items: center;
+      padding: 0 8px; gap: 6px; overflow: hidden; white-space: nowrap;
+      pointer-events: none;
+      font-size: .88rem; font-weight: 700; color: rgba(255,255,255,.88);
+      text-shadow: 0 1px 2px rgba(0,0,0,.5);
+    }
+    .spine-flat-author {
+      font-size: .88rem; font-weight: 700; opacity: .65; flex-shrink: 0;
+    }
+    .spine-flat-title {
+      overflow: hidden; text-overflow: ellipsis;
+    }
     /* index tabs */
     .spine-tab {
       position: absolute; right: -6px; width: 8px; height: 14px;
@@ -2504,38 +2518,45 @@ function renderSpine() {
   if (smt) smt.style.display = 'flex';
 
   const seed = s => { let h = 0; for (const c of s) h = Math.imul(31,h)+c.charCodeAt(0); return Math.abs(h); };
+  const chunkSize = 25;
 
-  // Pre-assign messy types per chunk (row): max 1 flat per row, followed by 2-3 standing-above
+  // Messy type assignment
+  // Types: 'normal' | 'lean' | 'stack' (lying flat) | 'platform' (flat base) | 'above' (standing on platform)
   const types = new Array(list.length).fill('normal');
+  const totalRows = Math.ceil(list.length / chunkSize);
   if (messy) {
+    // Every 2 rows gets a horizontal stack of exactly 3 books
+    // One row (different from stack rows) gets a platform (1 lying + 2 upright on top)
     for (let chunkStart = 0; chunkStart < list.length; chunkStart += chunkSize) {
-      const rs = seed('chunk'+chunkStart);
-      if (rs % 2 === 0) continue; // ~50% of rows have no flat book
-      // place flat book at a random position within chunk, not too close to edges
+      const rowIdx   = chunkStart / chunkSize;
       const chunkLen = Math.min(chunkSize, list.length - chunkStart);
-      const flatPos = chunkStart + 3 + (rs % (chunkLen - 6));
-      if (flatPos >= list.length - 3) continue;
-      types[flatPos] = 'flat';
-      const aboveCount = 2 + (rs % 2); // 2 or 3 books standing above
-      for (let k = 1; k <= aboveCount && flatPos + k < list.length; k++) {
-        types[flatPos + k] = 'above';
-      }
+      if (rowIdx % 2 !== 0) continue; // stack every other row only
+      const rs     = seed('rg' + chunkStart);
+      const offset = 3 + (rs % 4);
+      const pos    = chunkStart + offset;
+      if (pos + 3 > chunkStart + chunkLen) continue;
+      // Stack of exactly 3 books lying flat on the shelf
+      for (let k = 0; k < 3; k++) types[pos + k] = 'stack';
     }
-    // leaners: separate pass — ~1 in 4 normal books lean
-    let i = 0;
-    while (i < list.length) {
+    // Guarantee at least 1 lean per every 5 consecutive normal books
+    let windowNormal = 0;
+    for (let i = 0; i < list.length; i++) {
       if (types[i] === 'normal') {
-        const sv = seed('ln'+i);
-        if (sv % 4 === 0) types[i] = 'lean';
+        windowNormal++;
+        if (windowNormal >= 5) {
+          types[i] = 'lean';
+          windowNormal = 0;
+        }
+      } else {
+        windowNormal = 0;
       }
-      i++;
     }
   }
 
   const HEIGHTS = messy
-    ? [120,185,140,215,155,230,130,200,160,225,135,195,145,210,125,190]
+    ? [132,178,148,204,162,218,144,188,158,212,138,192,150,206,136,182]
     : [130,175,150,200,165,220,145,185,160,210,140,190];
-  const bookEls = list.map((e, i) => {
+  const makeBookEl = (e, i, extraStyle = '', extraClass = '') => {
     const pal = SPINE_PALETTES[i % SPINE_PALETTES.length];
     const bg  = `linear-gradient(to right, ${pal[0]}, ${pal[1]})`;
     const img = e.cover ? `<img src="${e.cover}" alt="" onerror="this.remove()"/>` : '';
@@ -2544,8 +2565,6 @@ function renderSpine() {
       ? `<div class="spine-label spine-stacked">${[...e.title].map(c=>`<span>${c}</span>`).join('')}</div>`
       : `<div class="spine-label spine-rotated">${e.title}</div>`;
     const tooltipText = e.title + (e.rating ? ' · '+'★'.repeat(e.rating) : '');
-
-    // Index tabs (messy only, ~70% of books get 1-2 tabs)
     let tabs = '';
     if (messy) {
       const sv = seed('tab'+i);
@@ -2559,34 +2578,80 @@ function renderSpine() {
         }
       }
     }
+    return { h, html: `<div class="spine-book${extraClass}" data-id="${e.id}" data-tip="${tooltipText.replace(/"/g,'&quot;')}" style="height:${h}px;background:${bg};${extraStyle}">\
+<div class="spine-book-inner">${img}</div>${tabs}${label}</div>` };
+  };
 
-    const type = types[i];
-    let extraStyle = '', extraClass = '';
-    if (type === 'flat') {
-      // Book lying on its side on the plank; rotates 90° CW from bottom-left
-      extraStyle = `--rot:90deg;transform-origin:bottom left;z-index:0;`;
-      extraClass = ' spine-flat';
-    } else if (type === 'above') {
-      // Book standing upright on top of the flat book (flat book is 40px tall when lying)
-      extraStyle = `margin-bottom:40px;z-index:2;`;
-    } else if (type === 'lean') {
-      const sv = seed('lean'+i);
-      const deg = (sv % 2 === 0 ? 1 : -1) * (7 + sv % 9);
-      extraStyle = `--rot:${deg}deg;`;
-    }
+  // Helper: horizontal flat-book label (title reads left-to-right)
+  const flatLabel = sb => `<div class="spine-flat-label">${sb.creator?`<span class="spine-flat-author">${sb.creator}</span> `:''}<span class="spine-flat-title">${sb.title}</span></div>`;
 
-    return `<div class="spine-book${extraClass}" data-id="${e.id}" data-tip="${tooltipText.replace(/"/g,'&quot;')}" style="height:${h}px;background:${bg};${extraStyle}">
-      <div class="spine-book-inner">${img}</div>
-      ${tabs}${label}
-    </div>`;
-  });
+  // Helper: book height from HEIGHTS (same formula as makeBookEl)
+  const bookH = (e, i) => HEIGHTS[(e.title.charCodeAt(0)+(e.title.charCodeAt(1)||0)+i) % HEIGHTS.length];
 
-  const chunkSize = 25;
   const chunks = [];
-  for (let i = 0; i < bookEls.length; i += chunkSize) chunks.push(bookEls.slice(i, i+chunkSize).join(''));
+  for (let chunkStart = 0; chunkStart < list.length; chunkStart += chunkSize) {
+    const chunkList  = list.slice(chunkStart, chunkStart + chunkSize);
+    const chunkTypes = types.slice(chunkStart, chunkStart + chunkSize);
+    const rowIdx     = chunkStart / chunkSize;
+    const isLastRow  = rowIdx === totalRows - 1;
+    // First book of non-last rows leans slightly left
+    const firstLeanDeg = (messy && !isLastRow && rowIdx % 4 === 0) ? -(3 + seed('fl'+rowIdx) % 4) : 0;
+    let els = '', ci = 0;
+
+    while (ci < chunkList.length) {
+      const li   = chunkStart + ci;
+      const type = chunkTypes[ci];
+
+      if (type === 'stack') {
+        // Horizontal stack: 2–3 books lying flat, stacked from shelf floor
+        // Each book: full height becomes lying length, 40px thick
+        // Group sits flush on shelf, books left-aligned (shorter books leave gap on right = natural)
+        let j = ci + 1;
+        while (j < chunkList.length && chunkTypes[j] === 'stack') j++;
+        const sBooks = chunkList.slice(ci, j);
+        const maxLen = Math.max(...sBooks.map((sb, k) => bookH(sb, li + k)));
+        const thick  = 40; // spine width = thickness when lying flat
+        // Sort so longest book is at the bottom (index 0 = bottom)
+        const sBooksWithH = sBooks.map((sb, k) => ({ sb, si: li + k, len: bookH(sb, li + k) }));
+        const longest = sBooksWithH.reduce((a, b) => b.len > a.len ? b : a);
+        const rest    = sBooksWithH.filter(x => x !== longest);
+        const ordered = [longest, ...rest];
+        let stackInner = '', yOff = 0;
+        ordered.forEach(({ sb, si, len }) => {
+          const pal = SPINE_PALETTES[si % SPINE_PALETTES.length];
+          const bg  = `linear-gradient(to bottom, ${pal[0]}, ${pal[1]})`;
+          const cov = sb.cover ? `<img src="${sb.cover}" alt="" onerror="this.remove()" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:left center;opacity:.85"/>` : '';
+          const tip = (sb.title+(sb.rating?' · '+'★'.repeat(sb.rating):'')).replace(/"/g,'&quot;');
+          stackInner += `<div class="spine-book" data-id="${sb.id}" data-tip="${tip}" style="position:absolute;bottom:${yOff}px;left:0;width:${len}px;height:${thick}px;background:${bg};overflow:hidden;border-radius:1px 2px 2px 1px;">${cov}${flatLabel(sb)}</div>`;
+          yOff += thick + 1;
+        });
+        const groupH = yOff - 1;
+        // flex footprint = widest book's lying length
+        els += `<div style="flex:0 0 ${maxLen}px;width:${maxLen}px;height:${groupH}px;position:relative;align-self:flex-end;">${stackInner}</div>`;
+        ci = j;
+
+      } else if (type === 'above') {
+        // Orphaned above — render as normal upright book
+        const isFirst = ci === 0 && firstLeanDeg !== 0;
+        els += makeBookEl(chunkList[ci], li, isFirst ? `--rot:${firstLeanDeg}deg;` : `z-index:1;`).html;
+        ci++;
+
+      } else if (type === 'lean') {
+        const sv  = seed('ln'+li);
+        const deg = ci === 0 ? firstLeanDeg : (sv % 2 === 0 ? 1 : -1) * (3 + sv % 4);
+        els += makeBookEl(chunkList[ci], li, `--rot:${deg}deg;z-index:0;`).html;
+        ci++;
+
+      } else {
+        const isFirst = ci === 0 && firstLeanDeg !== 0;
+        els += makeBookEl(chunkList[ci], li, isFirst ? `--rot:${firstLeanDeg}deg;z-index:0;` : `z-index:1;`).html;
+        ci++;
+      }
+    }
+    chunks.push(els);
+  }
 
   // Pencils: 2 total, each on a random row
-  const totalRows = Math.ceil(list.length / chunkSize);
   const pencilRow0 = messy ? seed('pencilA') % totalRows : -1;
   const pencilRow1 = messy ? (pencilRow0 + 1 + seed('pencilB') % Math.max(1, totalRows - 1)) % totalRows : -1;
 
@@ -2608,33 +2673,55 @@ function renderSpine() {
     let extras = '';
 
     if (messy) {
-      // scratch per row
-      const sx = 8 + (rs % 65), sy = 10 + (rs % 50);
-      extras += `<div class="shelf-scratch" style="left:${sx}%;top:${sy}px">${scratchSVG(rs, 48, 36)}</div>`;
+      // scratches: 1-3 small clusters per row at random spots
+      const scratchCount = 1 + (rs % 3);
+      for (let sc = 0; sc < scratchCount; sc++) {
+        const ss = seed('sc'+rowIdx+sc);
+        const sx = 3 + (ss % 88), sy = 6 + (ss % 60);
+        extras += `<div class="shelf-scratch" style="left:${sx}%;top:${sy}px">${scratchSVG(ss, 36, 28)}</div>`;
+      }
 
-      // 3–4 post-its spread evenly
-      const pitCount = 3 + (rs % 2);
-      const slotW = Math.floor(90 / (pitCount + 1));
+      // post-its: 0-2 per row, clustered near books (not evenly spaced)
+      const pitCount = rs % 3; // 0, 1, or 2
       for (let p = 0; p < pitCount; p++) {
-        const ps = seed('p'+rowIdx+p);
-        const left = 5 + slotW * (p + 1) + (ps % 4 - 2);
-        const top  = 8 + (ps % 40);
-        const rot  = ((ps % 20) - 10);
+        const ps = seed('pit'+rowIdx+p);
+        // cluster: anchor to a random x, small offset between notes
+        const anchor = 8 + (seed('pa'+rowIdx) % 72);
+        const left = anchor + (p * (6 + ps % 10)) - (ps % 5);
+        const top  = 4 + (ps % 30);
+        const rot  = ((ps % 28) - 14);
         extras += `<div class="shelf-postit" style="background:${POSTIT_COLORS[ps%POSTIT_COLORS.length]};left:${left}%;top:${top}px;transform:rotate(${rot}deg)"></div>`;
       }
 
-      // pencil on this row if designated
+      // dust smudges: soft semi-transparent ellipses on the plank
+      const dustCount = 1 + (rs % 3);
+      for (let d = 0; d < dustCount; d++) {
+        const ds = seed('dust'+rowIdx+d);
+        const dx = 5 + (ds % 85), dw = 30 + (ds % 50), dop = (.04 + (ds%4)*.015).toFixed(3);
+        extras += `<div style="position:absolute;bottom:4px;left:${dx}%;width:${dw}px;height:8px;border-radius:50%;background:rgba(180,140,80,${dop});pointer-events:none;filter:blur(3px)"></div>`;
+      }
+
+      // ring stains (mug marks): occasional circle on plank
+      if (rs % 5 === 0) {
+        const cs = seed('ring'+rowIdx);
+        const cx = 10 + (cs % 75);
+        const csz = 18 + (cs % 14);
+        const cop = (.06 + (cs%3)*.02).toFixed(3);
+        extras += `<div style="position:absolute;bottom:6px;left:${cx}%;width:${csz}px;height:${csz}px;border-radius:50%;border:2px solid rgba(160,110,50,${cop});pointer-events:none"></div>`;
+      }
+
+      // pencil on designated rows
       if (rowIdx === pencilRow0 || rowIdx === pencilRow1) {
         const ps = seed('pen'+rowIdx);
-        const pLeft = 10 + (ps % 70);
-        const pRot  = -15 + (ps % 30);
+        const pLeft = 8 + (ps % 74);
+        const pRot  = -18 + (ps % 36);
         const pColor = PENCIL_COLORS[ps % PENCIL_COLORS.length];
-        const pW = 55 + (ps % 20);
+        const pW = 52 + (ps % 24);
         extras += `<div class="shelf-pencil" style="left:${pLeft}%;bottom:22px;width:${pW}px;background:${pColor};transform:rotate(${pRot}deg);transform-origin:center center"></div>`;
       }
     }
 
-    return `<div class="spine-row${isLast?' spine-row-last':''}" style="position:relative">${extras}<div class="spine-shelf">${chunk}</div><div class="spine-shelf-plank"></div></div>`;
+    return `<div class="spine-row${isLast?' spine-row-last':''}" style="position:relative">${extras}<div class="spine-shelf">${chunk}</div><div class="spine-shelf-plank" style="position:relative;z-index:10;width:100%;left:0;right:0;"></div></div>`;
   });
 
   vc.innerHTML = `<div class="spine-container">${rows.join('')}</div>`;
@@ -2656,10 +2743,13 @@ function renderSpine() {
     const fullShelf = vc.querySelector('.spine-row:not(.spine-row-last) .spine-shelf');
     const lastShelf = vc.querySelector('.spine-row-last .spine-shelf');
     if (fullShelf && lastShelf) {
-      const firstBook = fullShelf.querySelector('.spine-book');
+      const firstBook = fullShelf.querySelector('.spine-book, [style*="flex:0"]');
       if (firstBook) {
         const offset = firstBook.getBoundingClientRect().left - lastShelf.getBoundingClientRect().left;
-        if (offset > 0) lastShelf.style.paddingLeft = offset + 'px';
+        // Always preserve at least 72px wall gap
+        const pl = Math.max(72, offset > 0 ? offset : 72);
+        lastShelf.style.paddingLeft  = pl + 'px';
+        lastShelf.style.paddingRight = '72px';
       }
     }
   });
