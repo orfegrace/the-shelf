@@ -2615,7 +2615,7 @@ function renderSpine() {
   };
 
   // Helper: horizontal flat-book label (title reads left-to-right)
-  const flatLabel = sb => `<div class="spine-flat-label">${sb.creator?`<span class="spine-flat-author">${sb.creator}</span> `:''}<span class="spine-flat-title">${sb.title}</span></div>`;
+  const flatLabel = sb => `<div class="spine-flat-label" style="justify-content:center"><span class="spine-flat-title">${sb.title}</span></div>`;
 
   // Helper: book height from HEIGHTS (same formula as makeBookEl)
   const bookH = (e, i) => HEIGHTS[(e.title.charCodeAt(0)+(e.title.charCodeAt(1)||0)+i) % HEIGHTS.length];
