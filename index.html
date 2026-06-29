@@ -1190,7 +1190,7 @@
     .spine-shelf {
       display: flex; align-items: flex-end; gap: 3px;
       padding: 28px 20px 0; flex-wrap: nowrap;
-      min-height: 220px;
+      min-height: 220px; width: 100%; box-sizing: border-box;
     }
     .spine-shelf-plank {
       height: 18px;
@@ -1199,12 +1199,12 @@
     }
     .spine-row { margin-bottom: 24px; }
     .spine-book {
-      width: 34px; min-width: 34px;
+      flex: 1; min-width: 28px; max-width: 52px;
       border-radius: 2px 2px 0 0;
       cursor: pointer; position: relative;
       display: flex; align-items: center; justify-content: center;
       transition: transform .2s ease;
-      overflow: hidden; flex-shrink: 0;
+      overflow: hidden;
     }
     .spine-book:hover { transform: translateY(-14px); z-index: 2; }
     .spine-book::after {
@@ -1214,14 +1214,12 @@
     }
     .spine-book img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .4; }
     .spine-label {
-      writing-mode: vertical-rl; text-orientation: mixed;
-      font-size: .65rem; font-weight: 700; color: rgba(255,255,255,.88);
+      display: flex; flex-direction: column; align-items: center;
+      font-size: .78rem; font-weight: 700; color: rgba(255,255,255,.88);
       padding: 8px 3px; position: relative; z-index: 1;
       text-shadow: 0 1px 2px rgba(0,0,0,.5);
-      overflow: hidden; max-height: 155px;
-      white-space: nowrap; text-overflow: ellipsis;
+      overflow: hidden; line-height: 1.2; gap: 1px;
     }
-    .spine-label.ltr { transform: rotate(180deg); }
     .spine-tooltip {
       position: absolute; bottom: calc(100% + 10px); left: 50%;
       transform: translateX(-50%);
@@ -2280,10 +2278,11 @@ function renderSpine() {
     const pal = SPINE_PALETTES[i % SPINE_PALETTES.length];
     const bg  = `linear-gradient(to right, ${pal[0]}, ${pal[1]})`;
     const img = e.cover ? `<img src="${e.cover}" alt="" onerror="this.remove()"/>` : '';
-    const h   = 120 + Math.abs((e.title.charCodeAt(0) || 65) % 3) * 30;
+    const HEIGHTS = [130, 175, 150, 200, 165, 220, 145, 185, 160, 210, 140, 190];
+    const h = HEIGHTS[(e.title.charCodeAt(0) + e.title.charCodeAt(1) + i) % HEIGHTS.length];
     return `<div class="spine-book" data-id="${e.id}" style="height:${h}px;background:${bg}">
       ${img}
-      <div class="spine-label${/[ᄀ-ᇿ㄰-㆏가-힣一-鿿぀-ヿ]/.test(e.title) ? '' : ' ltr'}">${e.title}</div>
+      <div class="spine-label">${[...e.title].map(c => `<span>${c}</span>`).join('')}</div>
       <div class="spine-tooltip">${e.title}${e.creator ? ' · ' + e.creator : ''}${e.rating ? ' ' + '★'.repeat(e.rating) : ''}</div>
     </div>`;
   });
