@@ -374,7 +374,7 @@
     .fav-oc {
       background: #fff;
       border-radius: 3px;
-      padding: 8px 8px 28px;
+      padding: 8px 8px 12px;
       position: relative;
       overflow: visible;
       box-shadow: 3px 5px 16px rgba(0,0,0,.16), 0 1px 3px rgba(0,0,0,.07);
@@ -463,11 +463,12 @@
     .fav-rc::before {
       content: '';
       position: absolute;
-      top: -9px; left: 50%; transform: translateX(-50%);
-      width: 38px; height: 15px;
-      background: rgba(238,216,120,.72);
-      border-radius: 3px;
-      box-shadow: 0 1px 4px rgba(0,0,0,.12);
+      top: -8px; left: 50%; transform: translateX(-50%);
+      width: 14px; height: 14px;
+      background: radial-gradient(circle at 38% 35%, #ff6b6b, #c0392b);
+      border-radius: 50%;
+      box-shadow: 0 2px 5px rgba(0,0,0,.35), inset 0 -1px 2px rgba(0,0,0,.2);
+      z-index: 3;
     }
     .fav-rc:nth-child(odd)  { transform: rotate(-0.8deg); }
     .fav-rc:nth-child(even) { transform: rotate(0.6deg); }
@@ -1245,31 +1246,60 @@
     .spine-book:hover .spine-tooltip { opacity: 1; }
 
     /* Moodboard view */
-    .moodboard { columns: 4 160px; gap: 10px; }
+    @keyframes mood-in {
+      from { opacity: 0; transform: translateY(-16px) rotate(var(--tilt, 0deg)); }
+      to   { opacity: 1; transform: translateY(0)     rotate(var(--tilt, 0deg)); }
+    }
+    .moodboard {
+      columns: 6 120px; gap: 12px;
+      background: #b8732e;
+      background-image:
+        radial-gradient(ellipse at 18% 25%, rgba(255,255,255,.07) 0%, transparent 45%),
+        radial-gradient(ellipse at 72% 55%, rgba(0,0,0,.06) 0%, transparent 40%),
+        radial-gradient(ellipse at 45% 80%, rgba(255,255,255,.05) 0%, transparent 35%),
+        repeating-radial-gradient(circle at 60% 40%, transparent 0, transparent 3px, rgba(0,0,0,.03) 3px, rgba(0,0,0,.03) 4px);
+      border-radius: var(--r); padding: 28px 22px;
+    }
     .mood-card {
-      break-inside: avoid; margin-bottom: 10px;
-      border-radius: 16px; overflow: hidden;
+      break-inside: avoid; margin-bottom: 12px;
       cursor: pointer; position: relative;
-      background: var(--surface);
-      transition: transform .2s ease;
+      background: #fffef9;
+      padding: 8px 8px 16px;
+      box-shadow: 2px 5px 14px rgba(0,0,0,.22), 0 1px 3px rgba(0,0,0,.12);
+      transform: rotate(var(--tilt, 0deg));
+      transition: transform .25s ease, box-shadow .25s ease, z-index 0s;
+      animation: mood-in .45s ease both;
+      animation-delay: var(--delay, 0s);
+      z-index: 1;
     }
-    .mood-card:hover { transform: translateY(-4px); }
+    [data-theme="dark"] .mood-card { background: #2a1e10; }
+    .mood-card:hover {
+      transform: rotate(0deg) scale(1.04) translateY(-4px) !important;
+      box-shadow: 6px 14px 32px rgba(0,0,0,.38);
+      z-index: 10;
+    }
     .mood-card img { display: block; width: 100%; height: auto; }
-    .mood-ph {
-      width: 100%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: .6rem; font-weight: 800; letter-spacing: .12em;
-      text-transform: uppercase; color: var(--muted);
+    .mood-pin {
+      width: 14px; height: 14px; border-radius: 50%;
+      margin: -3px auto 10px; position: relative;
+      box-shadow: 0 2px 5px rgba(0,0,0,.4), inset 0 -1px 2px rgba(0,0,0,.2);
     }
-    .mood-ph.movie { background: linear-gradient(145deg, var(--amber-lt), var(--honey)); }
-    .mood-ph.book  { background: linear-gradient(145deg, var(--sage-lt), #cfe8cc); }
-    .mood-caption {
-      padding: 10px 12px 12px;
+    .mood-pin::after {
+      content: ''; position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%,-50%);
+      width: 5px; height: 5px; border-radius: 50%;
+      background: rgba(255,255,255,.5);
     }
+    .mood-sticky {
+      width: 100%; display: flex; align-items: center; justify-content: center;
+      padding: 24px 14px; box-sizing: border-box;
+      font-size: .82rem; font-weight: 700; line-height: 1.4;
+      color: rgba(0,0,0,.6); text-align: center;
+    }
+    .mood-caption { padding: 10px 2px 2px; }
     .mood-title {
       font-family: 'Plus Jakarta Sans', sans-serif;
-      font-weight: 700; font-size: .82rem; line-height: 1.35;
-      color: var(--text);
+      font-weight: 700; font-size: .82rem; line-height: 1.35; color: var(--text);
     }
     .mood-meta { font-size: .7rem; color: var(--muted); margin-top: 4px; }
     .mood-badge-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
@@ -2312,14 +2342,33 @@ function renderMoodboard() {
   const vc   = document.getElementById('viewContent');
   const list = getFiltered();
   if (!list.length) { vc.innerHTML = emptyHTML(); return; }
+
+  const GENRE_COLORS = {
+    'fiction':'#b56830','fantasy':'#5e8a5a','romance':'#c06070','thriller':'#4a5a7a',
+    'horror':'#7a3030','sci-fi':'#4a7a9a','science':'#4a8a7a','history':'#8a7040',
+    'biography':'#6a7a5a','mystery':'#6a5a8a','comedy':'#c89030','drama':'#8a5050',
+    'action':'#9a5030','documentary':'#5a7a6a','non-fiction':'#7a6a50',
+  };
+  const STICKY_COLORS = ['#fef08a','#fda4af','#86efac','#93c5fd','#f9a8d4','#fdba74','#a5f3fc'];
+  const TILTS = [-1.8, 1.2, -0.7, 2.1, -2.4, 0.5, -1.3, 1.8, -0.4, 2.6];
   const phHeights = [120, 160, 200, 140, 180];
+
   const cards = list.map((e, i) => {
+    const genreKey = (e.genre || '').toLowerCase().replace(/[^a-z-]/g,'');
+    const genreColor = GENRE_COLORS[genreKey] || '#b56830';
+    const tilt = TILTS[i % TILTS.length];
+    const delay = Math.min(i * 0.04, 0.6).toFixed(2);
     const phH = phHeights[(e.title.charCodeAt(0) + i) % phHeights.length];
+    const stickyColor = STICKY_COLORS[i % STICKY_COLORS.length];
+
     const media = e.cover
-      ? `<img src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'mood-ph ${e.type}',style:'height:${phH}px'}))">`
-      : `<div class="mood-ph ${e.type}" style="height:${phH}px"></div>`;
+      ? `<img src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'mood-sticky',style:'background:${stickyColor};height:${phH}px',innerHTML:'${e.title.replace(/'/g,"\\'").replace(/"/g,'&quot;')}'}))">`
+      : `<div class="mood-sticky" style="background:${stickyColor};height:${phH}px">${e.title}</div>`;
+
     const stars = e.rating ? `<span style="color:var(--gold);font-size:.7rem">${'★'.repeat(e.rating)}</span>` : '';
-    return `<div class="mood-card" data-id="${e.id}">
+
+    return `<div class="mood-card" data-id="${e.id}" style="--tilt:${tilt}deg;--delay:${delay}s">
+      <div class="mood-pin" style="background:${genreColor}"></div>
       ${media}
       <div class="mood-caption">
         <div class="mood-title">${e.title}</div>
