@@ -1181,6 +1181,93 @@
     .list-creator:hover::after { opacity: .55; }
     .list-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 
+    /* Spine view */
+    .spine-container {
+      border-radius: var(--r);
+      overflow: hidden;
+      background: linear-gradient(to bottom, #4e2e12 0%, #3a2009 100%);
+    }
+    .spine-shelf {
+      display: flex; align-items: flex-end; gap: 3px;
+      padding: 28px 20px 0; flex-wrap: nowrap;
+      min-height: 220px;
+    }
+    .spine-shelf-plank {
+      height: 18px;
+      background: linear-gradient(to bottom, #7a4e1e 0%, #5a3610 60%, #3e2208 100%);
+      box-shadow: 0 4px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,200,100,.15);
+    }
+    .spine-row { margin-bottom: 24px; }
+    .spine-book {
+      width: 34px; min-width: 34px;
+      border-radius: 2px 2px 0 0;
+      cursor: pointer; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      transition: transform .2s ease;
+      overflow: hidden; flex-shrink: 0;
+    }
+    .spine-book:hover { transform: translateY(-14px); z-index: 2; }
+    .spine-book::after {
+      content: ''; position: absolute; top: 0; right: 0;
+      width: 4px; height: 100%;
+      background: rgba(0,0,0,.08);
+    }
+    .spine-book img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .4; }
+    .spine-label {
+      writing-mode: vertical-rl; text-orientation: mixed;
+      transform: rotate(180deg);
+      font-size: .55rem; font-weight: 700; color: rgba(255,255,255,.88);
+      padding: 8px 3px; position: relative; z-index: 1;
+      text-shadow: 0 1px 2px rgba(0,0,0,.5);
+      overflow: hidden; max-height: 155px;
+      white-space: nowrap; text-overflow: ellipsis;
+    }
+    .spine-tooltip {
+      position: absolute; bottom: calc(100% + 10px); left: 50%;
+      transform: translateX(-50%);
+      background: var(--text); color: var(--surface);
+      font-size: .72rem; font-weight: 600; padding: 6px 10px;
+      border-radius: 6px; white-space: nowrap; z-index: 10;
+      pointer-events: none; opacity: 0; transition: opacity .15s;
+    }
+    .spine-tooltip::after {
+      content: ''; position: absolute; top: 100%; left: 50%;
+      transform: translateX(-50%);
+      border: 5px solid transparent; border-top-color: var(--text);
+    }
+    .spine-book:hover .spine-tooltip { opacity: 1; }
+
+    /* Moodboard view */
+    .moodboard { columns: 4 160px; gap: 10px; }
+    .mood-card {
+      break-inside: avoid; margin-bottom: 10px;
+      border-radius: 16px; overflow: hidden;
+      cursor: pointer; position: relative;
+      background: var(--surface);
+      transition: transform .2s ease;
+    }
+    .mood-card:hover { transform: translateY(-4px); }
+    .mood-card img { display: block; width: 100%; height: auto; }
+    .mood-ph {
+      width: 100%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: .6rem; font-weight: 800; letter-spacing: .12em;
+      text-transform: uppercase; color: var(--muted);
+    }
+    .mood-ph.movie { background: linear-gradient(145deg, var(--amber-lt), var(--honey)); }
+    .mood-ph.book  { background: linear-gradient(145deg, var(--sage-lt), #cfe8cc); }
+    .mood-caption {
+      padding: 10px 12px 12px;
+    }
+    .mood-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-weight: 700; font-size: .82rem; line-height: 1.35;
+      color: var(--text);
+    }
+    .mood-meta { font-size: .7rem; color: var(--muted); margin-top: 4px; }
+    .mood-badge-row { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 6px; }
+    .mood-card .badge { font-size: .62rem; padding: 1px 6px; }
+
     /* Milestones */
     .milestones-grid {
       display: grid;
@@ -1502,6 +1589,14 @@
         <button class="view-btn" data-v="list">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
           List
+        </button>
+        <button class="view-btn" data-v="spine">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="4" height="18" rx="1"/><rect x="8" y="3" width="4" height="18" rx="1"/><rect x="14" y="3" width="4" height="18" rx="1"/><rect x="20" y="3" width="2" height="18" rx="1"/></svg>
+          Spine
+        </button>
+        <button class="view-btn" data-v="moodboard">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="8" height="10" rx="1"/><rect x="13" y="3" width="8" height="6" rx="1"/><rect x="13" y="11" width="8" height="10" rx="1"/><rect x="3" y="15" width="8" height="6" rx="1"/></svg>
+          Moodboard
         </button>
       </div>
     </div>
@@ -1846,13 +1941,15 @@ function getFiltered() {
 }
 
 // View switching
-const VIEW_LABELS = { gallery: 'Gallery', table: 'Table', timeline: 'Timeline', board: 'Board', list: 'List' };
+const VIEW_LABELS = { gallery: 'Gallery', table: 'Table', timeline: 'Timeline', board: 'Board', list: 'List', spine: 'Spine', moodboard: 'Moodboard' };
 const VIEW_ICONS  = {
-  gallery:  '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
-  table:    '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/>',
-  timeline: '<line x1="3" y1="6" x2="21" y2="6"/><rect x="3" y="10" width="10" height="3" rx="1"/><rect x="8" y="15" width="13" height="3" rx="1"/>',
-  board:    '<rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/>',
-  list:     '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>',
+  gallery:   '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
+  table:     '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/>',
+  timeline:  '<line x1="3" y1="6" x2="21" y2="6"/><rect x="3" y="10" width="10" height="3" rx="1"/><rect x="8" y="15" width="13" height="3" rx="1"/>',
+  board:     '<rect x="3" y="3" width="5" height="18" rx="1"/><rect x="10" y="3" width="5" height="12" rx="1"/><rect x="17" y="3" width="5" height="15" rx="1"/>',
+  list:      '<line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/>',
+  spine:     '<rect x="2" y="3" width="4" height="18" rx="1"/><rect x="8" y="3" width="4" height="18" rx="1"/><rect x="14" y="3" width="4" height="18" rx="1"/><rect x="20" y="3" width="2" height="18" rx="1"/>',
+  moodboard: '<rect x="3" y="3" width="8" height="10" rx="1"/><rect x="13" y="3" width="8" height="6" rx="1"/><rect x="13" y="11" width="8" height="10" rx="1"/><rect x="3" y="15" width="8" height="6" rx="1"/>',
 };
 
 function updateViewToggleLabel(v) {
@@ -1886,8 +1983,10 @@ function renderLibrary() {
     case 'gallery':  return renderGallery();
     case 'table':    return renderTable();
     case 'timeline': return renderTimeline();
-    case 'board':    return renderBoard();
-    case 'list':     return renderList();
+    case 'board':     return renderBoard();
+    case 'list':      return renderList();
+    case 'spine':     return renderSpine();
+    case 'moodboard': return renderMoodboard();
   }
 }
 
@@ -2165,6 +2264,66 @@ function renderList() {
 
   vc.innerHTML = `<div class="list-view">${rows}</div>`;
   vc.querySelectorAll('.list-item').forEach(c => c.addEventListener('click', () => openDetail(c.dataset.id)));
+}
+
+// Spine view
+const SPINE_PALETTES = [
+  ['#b56830','#c87838'],['#5e8a5a','#76a870'],['#b86050','#cc7866'],
+  ['#7a5c40','#9a7858'],['#4a7a8a','#5e9aaa'],['#8a5a7a','#aa7a9a'],
+  ['#6a7a4a','#8a9a5e'],['#c89030','#d8a848'],
+];
+function renderSpine() {
+  const vc   = document.getElementById('viewContent');
+  const list = getFiltered();
+  if (!list.length) { vc.innerHTML = emptyHTML(); return; }
+  const bookEls = list.map((e, i) => {
+    const pal = SPINE_PALETTES[i % SPINE_PALETTES.length];
+    const bg  = `linear-gradient(to right, ${pal[0]}, ${pal[1]})`;
+    const img = e.cover ? `<img src="${e.cover}" alt="" onerror="this.remove()"/>` : '';
+    const h   = 120 + Math.abs((e.title.charCodeAt(0) || 65) % 3) * 30;
+    return `<div class="spine-book" data-id="${e.id}" style="height:${h}px;background:${bg}">
+      ${img}
+      <div class="spine-label">${e.title}</div>
+      <div class="spine-tooltip">${e.title}${e.creator ? ' · ' + e.creator : ''}${e.rating ? ' ' + '★'.repeat(e.rating) : ''}</div>
+    </div>`;
+  });
+  const chunkSize = 25;
+  const rows = [];
+  for (let i = 0; i < bookEls.length; i += chunkSize) {
+    const chunk = bookEls.slice(i, i + chunkSize).join('');
+    rows.push(`<div class="spine-row"><div class="spine-shelf">${chunk}</div><div class="spine-shelf-plank"></div></div>`);
+  }
+  vc.innerHTML = `<div class="spine-container">${rows.join('')}</div>`;
+  vc.querySelectorAll('.spine-book').forEach(b => b.addEventListener('click', () => openDetail(b.dataset.id)));
+}
+
+// Moodboard view
+function renderMoodboard() {
+  const vc   = document.getElementById('viewContent');
+  const list = getFiltered();
+  if (!list.length) { vc.innerHTML = emptyHTML(); return; }
+  const phHeights = [120, 160, 200, 140, 180];
+  const cards = list.map((e, i) => {
+    const phH = phHeights[(e.title.charCodeAt(0) + i) % phHeights.length];
+    const media = e.cover
+      ? `<img src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'mood-ph ${e.type}',style:'height:${phH}px'}))">`
+      : `<div class="mood-ph ${e.type}" style="height:${phH}px"></div>`;
+    const stars = e.rating ? `<span style="color:var(--gold);font-size:.7rem">${'★'.repeat(e.rating)}</span>` : '';
+    return `<div class="mood-card" data-id="${e.id}">
+      ${media}
+      <div class="mood-caption">
+        <div class="mood-title">${e.title}</div>
+        ${e.creator || e.year ? `<div class="mood-meta">${[e.creator, e.year].filter(Boolean).join(' · ')}</div>` : ''}
+        <div class="mood-badge-row">
+          <span class="badge ${e.type === 'movie' ? 'b-movie' : 'b-book'}">${e.type === 'movie' ? 'Movie' : 'Book'}</span>
+          ${statusBadge(e)}
+          ${stars}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+  vc.innerHTML = `<div class="moodboard">${cards}</div>`;
+  vc.querySelectorAll('.mood-card').forEach(c => c.addEventListener('click', () => openDetail(c.dataset.id)));
 }
 
 // Render dashboard
@@ -2715,15 +2874,15 @@ function saveEntry() {
 
 // Wire events
 // Nav
-document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => {
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  const v = btn.dataset.view;
+function switchNav(v) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.view === v));
   document.getElementById('vLibrary').classList.toggle('active',    v === 'library');
   document.getElementById('vDashboard').classList.toggle('active',  v === 'dashboard');
   document.getElementById('vFavorites').classList.toggle('active',  v === 'favorites');
   if (v === 'favorites') renderFavorites();
-}));
+  sessionStorage.setItem('mt_nav', v);
+}
+document.querySelectorAll('.nav-btn').forEach(btn => btn.addEventListener('click', () => switchNav(btn.dataset.view)));
 
 // View buttons
 document.querySelectorAll('.view-btn').forEach(b => b.addEventListener('click', () => setView(b.dataset.v)));
@@ -2807,7 +2966,7 @@ function closeSidebar() {
   document.getElementById('sidebarBackdrop').classList.remove('open');
 }
 document.getElementById('sidebarBtn').addEventListener('click', openSidebar);
-document.getElementById('logoBtn').addEventListener('click', () => document.querySelector('.nav-btn[data-view="library"]').click());
+document.getElementById('logoBtn').addEventListener('click', () => switchNav('library'));
 document.getElementById('closeSidebar').addEventListener('click', closeSidebar);
 document.getElementById('sidebarBackdrop').addEventListener('click', closeSidebar);
 
@@ -2912,11 +3071,20 @@ async function showApp(user) {
     }
   }
 
-  S.view = 'gallery';
-  document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.v === 'gallery'));
-  updateViewToggleLabel('gallery');
+  const restoreView = arguments[1] === true;
+  const savedLibView = restoreView ? (localStorage.getItem('mt_view') || 'gallery') : 'gallery';
+  S.view = savedLibView;
+  document.querySelectorAll('.view-btn').forEach(b => b.classList.toggle('active', b.dataset.v === savedLibView));
+  updateViewToggleLabel(savedLibView);
   renderLibrary();
   renderDashboard();
+
+  if (restoreView) {
+    const savedNav = sessionStorage.getItem('mt_nav') || 'library';
+    switchNav(savedNav);
+  } else {
+    switchNav('library');
+  }
 }
 
 function showAuthScreen() {
@@ -3005,13 +3173,13 @@ document.getElementById('signOutBtn').addEventListener('click', async () => {
 
 // Auth state listener — handles sign in, sign out, and email verification redirect
 sb.auth.onAuthStateChange((event, session) => {
-  if (event === 'SIGNED_IN' && session)  showApp(session.user);
+  if (event === 'SIGNED_IN' && session)  showApp(session.user, false);
   if (event === 'SIGNED_OUT') { S.userId = null; S.entries = []; showAuthScreen(); renderLibrary(); renderDashboard(); }
 });
 
 // Init — restore session if already logged in
 sb.auth.getSession().then(({ data: { session } }) => {
-  if (session) showApp(session.user);
+  if (session) showApp(session.user, true);
   else { showAuthScreen(); renderLibrary(); renderDashboard(); }
 });
 </script>
