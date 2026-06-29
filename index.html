@@ -943,6 +943,13 @@
       white-space: nowrap;
     }
     .view-toggle:hover { color: var(--amber); }
+    .spine-mode-btn {
+      background: none; border: none; cursor: pointer; padding: 1px 5px;
+      font-family: 'Plus Jakarta Sans', sans-serif; font-size: .72rem; font-weight: 700;
+      color: var(--muted); border-radius: var(--pill); transition: color .15s, background .15s;
+    }
+    .spine-mode-btn:hover { color: var(--amber); }
+    .spine-mode-btn.active { color: var(--amber); }
     .view-toggle .chevron { transition: transform .22s; flex-shrink: 0; }
     .view-switcher.open .view-toggle .chevron { transform: rotate(180deg); }
     .view-dropdown {
@@ -1234,7 +1241,7 @@
     /* Spine view */
     .spine-container {
       border-radius: var(--r);
-      overflow-x: auto; overflow-y: hidden;
+      overflow-x: auto; overflow-y: visible;
       background: linear-gradient(to bottom, #4e2e12 0%, #3a2009 100%);
       width: 100%; box-sizing: border-box;
     }
@@ -1242,8 +1249,9 @@
     .spine-shelf {
       display: flex; align-items: flex-end; justify-content: center; gap: 2px;
       padding: 28px 24px 0; flex-wrap: nowrap;
-      min-height: 220px;
+      min-height: 220px; overflow: visible;
     }
+    .spine-row-last { margin-bottom: 0; }
     .spine-row-last .spine-shelf { justify-content: flex-start; }
     .spine-shelf-plank {
       height: 18px; width: 100%;
@@ -1256,15 +1264,42 @@
       cursor: pointer; position: relative;
       display: flex; align-items: center; justify-content: center;
       transition: transform .2s ease;
-      overflow: hidden;
+      overflow: visible;
+      --rot: 0deg;
+      transform: rotate(var(--rot));
+      transform-origin: bottom center;
     }
-    .spine-book:hover { transform: translateY(-14px); z-index: 2; }
+    .spine-book .spine-book-inner {
+      position: absolute; inset: 0; overflow: hidden;
+      border-radius: 2px 2px 0 0;
+    }
+    .spine-book:hover { transform: rotate(var(--rot)) translateY(-14px); z-index: 10; }
+    .spine-book.spine-flat { transform-origin: bottom left; z-index: 0; }
+    .spine-book.spine-flat:hover { transform: rotate(90deg) translateY(-8px); }
+    /* index tabs */
+    .spine-tab {
+      position: absolute; right: -6px; width: 8px; height: 14px;
+      border-radius: 0 3px 3px 0; z-index: 2; pointer-events: none;
+    }
+    /* post-its */
+    .shelf-postit {
+      position: absolute; pointer-events: none;
+      width: 28px; height: 24px; border-radius: 1px;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,.2));
+    }
+    /* scratches */
+    .shelf-scratch { position: absolute; pointer-events: none; opacity: .6; }
+    /* pencils */
+    .shelf-pencil {
+      position: absolute; height: 7px; border-radius: 1px 0 0 1px;
+      pointer-events: none; z-index: 4;
+    }
     .spine-book::after {
       content: ''; position: absolute; top: 0; right: 0;
       width: 4px; height: 100%;
       background: rgba(0,0,0,.08);
     }
-    .spine-book img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
+    .spine-book-inner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
     .spine-label {
       font-size: .88rem; font-weight: 700; color: rgba(255,255,255,.88);
       position: relative; z-index: 1;
@@ -1274,27 +1309,26 @@
     .spine-stacked {
       display: flex; flex-direction: column; align-items: center;
       padding: 8px 3px; line-height: 1.2; gap: 1px;
+      max-height: calc(100% - 12px); overflow: hidden;
     }
     .spine-rotated {
       writing-mode: vertical-rl; text-orientation: mixed;
       transform: rotate(180deg);
-      padding: 8px 3px; white-space: nowrap; text-overflow: ellipsis;
-      max-height: 155px;
+      padding: 8px 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      max-height: calc(100% - 12px);
     }
-    .spine-tooltip {
-      position: absolute; bottom: calc(100% + 10px); left: 50%;
-      transform: translateX(-50%);
+    #spineTooltip {
+      position: fixed; display: none;
       background: var(--text); color: var(--surface);
       font-size: .72rem; font-weight: 600; padding: 6px 10px;
-      border-radius: 6px; white-space: nowrap; z-index: 10;
-      pointer-events: none; opacity: 0; transition: opacity .15s;
+      border-radius: 6px; white-space: nowrap; z-index: 9999;
+      pointer-events: none; transform: translateX(-50%);
     }
-    .spine-tooltip::after {
+    #spineTooltip::after {
       content: ''; position: absolute; top: 100%; left: 50%;
       transform: translateX(-50%);
       border: 5px solid transparent; border-top-color: var(--text);
     }
-    .spine-book:hover .spine-tooltip { opacity: 1; }
 
     /* Moodboard view */
     @keyframes mood-in {
@@ -1812,6 +1846,11 @@
       <button class="add-btn" id="addBtn"><span style="font-size:1.2rem;line-height:1">+</span> Add Entry</button>
     </div>
 
+    <div id="spineModeToggle" style="display:none;align-items:center;gap:4px;margin:-20px 0 6px">
+      <button class="spine-mode-btn active" id="spineNeat" onclick="setSpineMode('neat')">Neat</button>
+      <span style="color:var(--muted);font-size:.72rem">/</span>
+      <button class="spine-mode-btn" id="spineMessy" onclick="setSpineMode('messy')">Messy</button>
+    </div>
     <div id="viewContent"></div>
   </div>
 
@@ -2139,6 +2178,8 @@ function setView(v) {
   updateViewToggleLabel(v);
   document.getElementById('viewSwitcher')?.classList.remove('open');
   document.getElementById('viewToggle')?.setAttribute('aria-expanded', 'false');
+  const smt = document.getElementById('spineModeToggle');
+  if (smt) smt.style.display = v === 'spine' ? 'flex' : 'none';
   renderLibrary();
 }
 
@@ -2448,33 +2489,187 @@ const SPINE_PALETTES = [
   ['#7a5c40','#9a7858'],['#4a7a8a','#5e9aaa'],['#8a5a7a','#aa7a9a'],
   ['#6a7a4a','#8a9a5e'],['#c89030','#d8a848'],
 ];
+const TAB_COLORS = ['#fef08a','#fda4af','#86efac','#93c5fd','#f9a8d4','#fdba74','#a5f3fc','#c4b5fd'];
+const POSTIT_COLORS = ['#fef9c3','#fce7f3','#dbeafe','#dcfce7','#ffe4e6','#fde8d0'];
+const PENCIL_COLORS = ['#e63946','#2a9d8f','#e9c46a','#264653','#f4a261'];
+
 function renderSpine() {
   const vc   = document.getElementById('viewContent');
   const list = getFiltered();
   if (!list.length) { vc.innerHTML = emptyHTML(); return; }
+  const messy = (S.spineMode || 'neat') === 'messy';
+
+  // Show/hide toggle
+  const smt = document.getElementById('spineModeToggle');
+  if (smt) smt.style.display = 'flex';
+
+  const seed = s => { let h = 0; for (const c of s) h = Math.imul(31,h)+c.charCodeAt(0); return Math.abs(h); };
+
+  // Pre-assign messy types per chunk (row): max 1 flat per row, followed by 2-3 standing-above
+  const types = new Array(list.length).fill('normal');
+  if (messy) {
+    for (let chunkStart = 0; chunkStart < list.length; chunkStart += chunkSize) {
+      const rs = seed('chunk'+chunkStart);
+      if (rs % 2 === 0) continue; // ~50% of rows have no flat book
+      // place flat book at a random position within chunk, not too close to edges
+      const chunkLen = Math.min(chunkSize, list.length - chunkStart);
+      const flatPos = chunkStart + 3 + (rs % (chunkLen - 6));
+      if (flatPos >= list.length - 3) continue;
+      types[flatPos] = 'flat';
+      const aboveCount = 2 + (rs % 2); // 2 or 3 books standing above
+      for (let k = 1; k <= aboveCount && flatPos + k < list.length; k++) {
+        types[flatPos + k] = 'above';
+      }
+    }
+    // leaners: separate pass — ~1 in 4 normal books lean
+    let i = 0;
+    while (i < list.length) {
+      if (types[i] === 'normal') {
+        const sv = seed('ln'+i);
+        if (sv % 4 === 0) types[i] = 'lean';
+      }
+      i++;
+    }
+  }
+
+  const HEIGHTS = messy
+    ? [120,185,140,215,155,230,130,200,160,225,135,195,145,210,125,190]
+    : [130,175,150,200,165,220,145,185,160,210,140,190];
   const bookEls = list.map((e, i) => {
     const pal = SPINE_PALETTES[i % SPINE_PALETTES.length];
     const bg  = `linear-gradient(to right, ${pal[0]}, ${pal[1]})`;
     const img = e.cover ? `<img src="${e.cover}" alt="" onerror="this.remove()"/>` : '';
-    const HEIGHTS = [130, 175, 150, 200, 165, 220, 145, 185, 160, 210, 140, 190];
-    const h = HEIGHTS[(e.title.charCodeAt(0) + e.title.charCodeAt(1) + i) % HEIGHTS.length];
-    return `<div class="spine-book" data-id="${e.id}" style="height:${h}px;background:${bg}">
-      ${img}
-      ${/[가-힣ᄀ-ᇿ一-鿿]/.test(e.title)
-        ? `<div class="spine-label spine-stacked">${[...e.title].map(c => `<span>${c}</span>`).join('')}</div>`
-        : `<div class="spine-label spine-rotated">${e.title}</div>`}
-      <div class="spine-tooltip">${e.title}${e.creator ? ' · ' + e.creator : ''}${e.rating ? ' ' + '★'.repeat(e.rating) : ''}</div>
+    const h   = HEIGHTS[(e.title.charCodeAt(0) + (e.title.charCodeAt(1)||0) + i) % HEIGHTS.length];
+    const label = /[가-힣ᄀ-ᇿ一-鿿]/.test(e.title)
+      ? `<div class="spine-label spine-stacked">${[...e.title].map(c=>`<span>${c}</span>`).join('')}</div>`
+      : `<div class="spine-label spine-rotated">${e.title}</div>`;
+    const tooltipText = e.title + (e.rating ? ' · '+'★'.repeat(e.rating) : '');
+
+    // Index tabs (messy only, ~70% of books get 1-2 tabs)
+    let tabs = '';
+    if (messy) {
+      const sv = seed('tab'+i);
+      if (sv % 10 < 7) {
+        const top = 18 + (sv % Math.max(1, h - 50));
+        tabs = `<div class="spine-tab" style="background:${TAB_COLORS[sv % TAB_COLORS.length]};top:${top}px"></div>`;
+        if (sv % 3 === 0) {
+          const top2 = Math.min(top + 28, h - 20);
+          const sv2 = seed('tab2'+i);
+          tabs += `<div class="spine-tab" style="background:${TAB_COLORS[sv2 % TAB_COLORS.length]};top:${top2}px"></div>`;
+        }
+      }
+    }
+
+    const type = types[i];
+    let extraStyle = '', extraClass = '';
+    if (type === 'flat') {
+      // Book lying on its side on the plank; rotates 90° CW from bottom-left
+      extraStyle = `--rot:90deg;transform-origin:bottom left;z-index:0;`;
+      extraClass = ' spine-flat';
+    } else if (type === 'above') {
+      // Book standing upright on top of the flat book (flat book is 40px tall when lying)
+      extraStyle = `margin-bottom:40px;z-index:2;`;
+    } else if (type === 'lean') {
+      const sv = seed('lean'+i);
+      const deg = (sv % 2 === 0 ? 1 : -1) * (7 + sv % 9);
+      extraStyle = `--rot:${deg}deg;`;
+    }
+
+    return `<div class="spine-book${extraClass}" data-id="${e.id}" data-tip="${tooltipText.replace(/"/g,'&quot;')}" style="height:${h}px;background:${bg};${extraStyle}">
+      <div class="spine-book-inner">${img}</div>
+      ${tabs}${label}
     </div>`;
   });
+
   const chunkSize = 25;
   const chunks = [];
-  for (let i = 0; i < bookEls.length; i += chunkSize) chunks.push(bookEls.slice(i, i + chunkSize).join(''));
-  const rows = chunks.map((chunk, i) => {
-    const isLast = i === chunks.length - 1;
-    return `<div class="spine-row${isLast ? ' spine-row-last' : ''}"><div class="spine-shelf">${chunk}</div><div class="spine-shelf-plank"></div></div>`;
+  for (let i = 0; i < bookEls.length; i += chunkSize) chunks.push(bookEls.slice(i, i+chunkSize).join(''));
+
+  // Pencils: 2 total, each on a random row
+  const totalRows = Math.ceil(list.length / chunkSize);
+  const pencilRow0 = messy ? seed('pencilA') % totalRows : -1;
+  const pencilRow1 = messy ? (pencilRow0 + 1 + seed('pencilB') % Math.max(1, totalRows - 1)) % totalRows : -1;
+
+  // Scratch SVG
+  const scratchSVG = (sv, w, h) => {
+    let s = '';
+    for (let k = 0; k < 4; k++) {
+      const ks = seed('sc'+sv+k);
+      const x1=(ks%w), y1=(ks%h), dx=10+(ks%16), dy=8+(ks%12);
+      const op=(.2+(ks%4)*.07).toFixed(2);
+      s += `<line x1="${x1}" y1="${y1}" x2="${x1+dx}" y2="${y1+dy}" stroke="rgba(255,215,140,${op})" stroke-width="${.6+(ks%3)*.25}" stroke-linecap="round"/>`;
+    }
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" fill="none">${s}</svg>`;
+  };
+
+  const rows = chunks.map((chunk, rowIdx) => {
+    const isLast = rowIdx === chunks.length - 1;
+    const rs = seed('row'+rowIdx);
+    let extras = '';
+
+    if (messy) {
+      // scratch per row
+      const sx = 8 + (rs % 65), sy = 10 + (rs % 50);
+      extras += `<div class="shelf-scratch" style="left:${sx}%;top:${sy}px">${scratchSVG(rs, 48, 36)}</div>`;
+
+      // 3–4 post-its spread evenly
+      const pitCount = 3 + (rs % 2);
+      const slotW = Math.floor(90 / (pitCount + 1));
+      for (let p = 0; p < pitCount; p++) {
+        const ps = seed('p'+rowIdx+p);
+        const left = 5 + slotW * (p + 1) + (ps % 4 - 2);
+        const top  = 8 + (ps % 40);
+        const rot  = ((ps % 20) - 10);
+        extras += `<div class="shelf-postit" style="background:${POSTIT_COLORS[ps%POSTIT_COLORS.length]};left:${left}%;top:${top}px;transform:rotate(${rot}deg)"></div>`;
+      }
+
+      // pencil on this row if designated
+      if (rowIdx === pencilRow0 || rowIdx === pencilRow1) {
+        const ps = seed('pen'+rowIdx);
+        const pLeft = 10 + (ps % 70);
+        const pRot  = -15 + (ps % 30);
+        const pColor = PENCIL_COLORS[ps % PENCIL_COLORS.length];
+        const pW = 55 + (ps % 20);
+        extras += `<div class="shelf-pencil" style="left:${pLeft}%;bottom:22px;width:${pW}px;background:${pColor};transform:rotate(${pRot}deg);transform-origin:center center"></div>`;
+      }
+    }
+
+    return `<div class="spine-row${isLast?' spine-row-last':''}" style="position:relative">${extras}<div class="spine-shelf">${chunk}</div><div class="spine-shelf-plank"></div></div>`;
   });
+
   vc.innerHTML = `<div class="spine-container">${rows.join('')}</div>`;
-  vc.querySelectorAll('.spine-book').forEach(b => b.addEventListener('click', () => openDetail(b.dataset.id)));
+  // Shared fixed tooltip
+  let tip = document.getElementById('spineTooltip');
+  if (!tip) { tip = document.createElement('div'); tip.id = 'spineTooltip'; document.body.appendChild(tip); }
+  vc.querySelectorAll('.spine-book').forEach(b => {
+    b.addEventListener('click', () => openDetail(b.dataset.id));
+    b.addEventListener('mouseenter', () => {
+      const r = b.getBoundingClientRect();
+      tip.textContent = b.dataset.tip || '';
+      tip.style.left = (r.left + r.width / 2) + 'px';
+      tip.style.top  = Math.max(8, r.top - 44) + 'px';
+      tip.style.display = 'block';
+    });
+    b.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+  });
+  requestAnimationFrame(() => {
+    const fullShelf = vc.querySelector('.spine-row:not(.spine-row-last) .spine-shelf');
+    const lastShelf = vc.querySelector('.spine-row-last .spine-shelf');
+    if (fullShelf && lastShelf) {
+      const firstBook = fullShelf.querySelector('.spine-book');
+      if (firstBook) {
+        const offset = firstBook.getBoundingClientRect().left - lastShelf.getBoundingClientRect().left;
+        if (offset > 0) lastShelf.style.paddingLeft = offset + 'px';
+      }
+    }
+  });
+}
+
+function setSpineMode(mode) {
+  S.spineMode = mode;
+  document.getElementById('spineNeat')?.classList.toggle('active', mode === 'neat');
+  document.getElementById('spineMessy')?.classList.toggle('active', mode === 'messy');
+  renderLibrary();
 }
 
 // Moodboard view
