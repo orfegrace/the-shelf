@@ -1188,7 +1188,7 @@
       background: linear-gradient(to bottom, #4e2e12 0%, #3a2009 100%);
     }
     .spine-shelf {
-      display: flex; align-items: flex-end; gap: 3px;
+      display: flex; align-items: flex-end; justify-content: space-between;
       padding: 28px 20px 0; flex-wrap: nowrap;
       min-height: 220px; width: 100%; box-sizing: border-box;
     }
@@ -1199,7 +1199,7 @@
     }
     .spine-row { margin-bottom: 24px; }
     .spine-book {
-      flex: 1; min-width: 28px; max-width: 52px;
+      flex: 0 0 34px; width: 34px;
       border-radius: 2px 2px 0 0;
       cursor: pointer; position: relative;
       display: flex; align-items: center; justify-content: center;
@@ -1214,11 +1214,20 @@
     }
     .spine-book img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .4; }
     .spine-label {
-      display: flex; flex-direction: column; align-items: center;
       font-size: .78rem; font-weight: 700; color: rgba(255,255,255,.88);
-      padding: 8px 3px; position: relative; z-index: 1;
+      position: relative; z-index: 1;
       text-shadow: 0 1px 2px rgba(0,0,0,.5);
-      overflow: hidden; line-height: 1.2; gap: 1px;
+      overflow: hidden;
+    }
+    .spine-stacked {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 8px 3px; line-height: 1.2; gap: 1px;
+    }
+    .spine-rotated {
+      writing-mode: vertical-rl; text-orientation: mixed;
+      transform: rotate(180deg);
+      padding: 8px 3px; white-space: nowrap; text-overflow: ellipsis;
+      max-height: 155px;
     }
     .spine-tooltip {
       position: absolute; bottom: calc(100% + 10px); left: 50%;
@@ -2282,7 +2291,9 @@ function renderSpine() {
     const h = HEIGHTS[(e.title.charCodeAt(0) + e.title.charCodeAt(1) + i) % HEIGHTS.length];
     return `<div class="spine-book" data-id="${e.id}" style="height:${h}px;background:${bg}">
       ${img}
-      <div class="spine-label">${[...e.title].map(c => `<span>${c}</span>`).join('')}</div>
+      ${/[가-힣ᄀ-ᇿ一-鿿]/.test(e.title)
+        ? `<div class="spine-label spine-stacked">${[...e.title].map(c => `<span>${c}</span>`).join('')}</div>`
+        : `<div class="spine-label spine-rotated">${e.title}</div>`}
       <div class="spine-tooltip">${e.title}${e.creator ? ' · ' + e.creator : ''}${e.rating ? ' ' + '★'.repeat(e.rating) : ''}</div>
     </div>`;
   });
