@@ -6,11 +6,14 @@ A personal tracker I built to keep my books and movies in one place. You can log
 
 ## Screenshots of the website
 
-### Library — Gallery View
-<img width="1440" height="715" alt="Screenshot 2026-06-14 at 10 49 35 AM" src="https://github.com/user-attachments/assets/65c6fb65-66fd-4b15-9345-1d31c51e7c4e" />
+### Library — Gallery View (7 views, search bars, condition drop downs)
+<img width="1440" height="748" alt="Screenshot 2026-06-28 at 11 55 50 PM" src="https://github.com/user-attachments/assets/3680863e-8023-4b12-b703-39abb845a389" />
 
 ### Library — Board View
 <img width="1440" height="744" alt="Screenshot 2026-06-14 at 11 18 18 AM" src="https://github.com/user-attachments/assets/bfc5800b-9752-4fe4-aba1-d92567306c81" />
+
+### Library - Spine View 
+<img width="1440" height="749" alt="Screenshot 2026-06-28 at 11 57 08 PM" src="https://github.com/user-attachments/assets/2c74aae8-5a0b-48bd-a3e7-8aa3e4c41b98" />
 
 ### Library - Adding an Entry
 <img width="1440" height="715" alt="Screenshot 2026-06-14 at 11 10 20 AM" src="https://github.com/user-attachments/assets/fb950260-b9dc-4b1a-8dab-fdbea0d56585" />
