@@ -2436,7 +2436,7 @@ function renderMoodboard() {
     const backColor = genreColor + 'ee';
     const backMeta = [e.creator, e.year].filter(Boolean).join(' · ');
     const backStars = e.rating ? '★'.repeat(e.rating) : '';
-    const backStatus = e.status ? `<span style="font-size:.6rem;opacity:.7;text-transform:uppercase;letter-spacing:.06em">${e.status}</span>` : '';
+    const backStatus = '';
 
     return `<div class="mood-card ${sizeClass}" data-id="${e.id}" data-rating="${e.rating||0}" style="--delay:${delay}s">
       <div class="mood-inner">
