@@ -1268,6 +1268,8 @@
       perspective: 1000px;
       gap: 8px;
       border-radius: var(--r);
+      position: relative; z-index: 1;
+      padding: 8px;
     }
     .mood-card {
       cursor: pointer; position: relative;
@@ -2099,6 +2101,7 @@ function emptyHTML() {
 
 // Render library (dispatcher)
 function renderLibrary() {
+  const vc = document.getElementById('viewContent');
   switch (S.view) {
     case 'gallery':  return renderGallery();
     case 'table':    return renderTable();
@@ -2480,7 +2483,11 @@ function renderMoodboard() {
       </div>
     </div>`;
   }).join('');
-  vc.innerHTML = `<div class="moodboard">${cards}</div>`;
+  vc.innerHTML = `
+    <div class="moodboard">${cards}</div>`;
+
+
+  // scroll glow
 
   vc.querySelectorAll('.mood-card').forEach(c => {
     c.addEventListener('click', () => openDetail(c.dataset.id));
