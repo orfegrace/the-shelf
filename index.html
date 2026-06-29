@@ -1215,13 +1215,13 @@
     .spine-book img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .4; }
     .spine-label {
       writing-mode: vertical-rl; text-orientation: mixed;
-      transform: rotate(180deg);
       font-size: .55rem; font-weight: 700; color: rgba(255,255,255,.88);
       padding: 8px 3px; position: relative; z-index: 1;
       text-shadow: 0 1px 2px rgba(0,0,0,.5);
       overflow: hidden; max-height: 155px;
       white-space: nowrap; text-overflow: ellipsis;
     }
+    .spine-label.ltr { transform: rotate(180deg); }
     .spine-tooltip {
       position: absolute; bottom: calc(100% + 10px); left: 50%;
       transform: translateX(-50%);
@@ -2283,7 +2283,7 @@ function renderSpine() {
     const h   = 120 + Math.abs((e.title.charCodeAt(0) || 65) % 3) * 30;
     return `<div class="spine-book" data-id="${e.id}" style="height:${h}px;background:${bg}">
       ${img}
-      <div class="spine-label">${e.title}</div>
+      <div class="spine-label${/[ᄀ-ᇿ㄰-㆏가-힣一-鿿぀-ヿ]/.test(e.title) ? '' : ' ltr'}">${e.title}</div>
       <div class="spine-tooltip">${e.title}${e.creator ? ' · ' + e.creator : ''}${e.rating ? ' ' + '★'.repeat(e.rating) : ''}</div>
     </div>`;
   });
