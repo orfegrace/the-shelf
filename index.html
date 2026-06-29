@@ -1262,7 +1262,7 @@
       border-radius: var(--r);
     }
     .mood-card {
-      cursor: pointer; position: relative; overflow: hidden;
+      cursor: pointer; position: relative;
       border-radius: 10px;
       grid-column: span 1; grid-row: span 2;
       box-shadow: 0 2px 10px rgba(0,0,0,.18);
@@ -1271,61 +1271,80 @@
       animation: mood-in .4s ease both;
       animation-delay: var(--delay, 0s);
       z-index: 1;
-      background: var(--surface);
     }
     .mood-card.mood-small { grid-column: span 1; grid-row: span 1; }
     .mood-card.mood-wide  { grid-column: span 2; grid-row: span 2; }
     .mood-card.mood-tall  { grid-column: span 1; grid-row: span 3; }
     .mood-card.mood-big   { grid-column: span 2; grid-row: span 3; }
     .mood-card:hover { box-shadow: 0 10px 32px rgba(0,0,0,.35); z-index: 10; }
-    .mood-card::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(115deg, transparent 25%, rgba(255,255,255,.28) 50%, transparent 75%);
-      transform: translateX(-100%) skewX(-15deg);
-      transition: transform .65s ease;
-      z-index: 6; pointer-events: none; border-radius: 10px;
+    .mood-card.flipped { z-index: 20; }
+    /* inner flip wrapper */
+    .mood-inner {
+      position: absolute; inset: 0; border-radius: 10px;
+      transform-style: preserve-3d;
+      transition: transform .55s cubic-bezier(.4,0,.2,1);
+      container-type: size;
     }
-    .mood-card:hover::before { transform: translateX(200%) skewX(-15deg); }
-    .mood-card img {
+    .mood-card.flipped .mood-inner { transform: rotateY(180deg); }
+    /* front face */
+    .mood-front {
+      position: absolute; inset: 0; border-radius: 10px;
+      overflow: hidden; backface-visibility: hidden;
+      background: var(--surface);
+    }
+    .mood-front img {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
       transition: transform .5s ease;
     }
-    .mood-card:hover img { transform: scale(1.08); }
+    .mood-card:not(.flipped):hover .mood-front img { transform: scale(1.08); }
+    /* back face */
+    .mood-back {
+      position: absolute; inset: 0; border-radius: 10px;
+      overflow: hidden; backface-visibility: hidden;
+      transform: rotateY(180deg);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; padding: 14px; text-align: center;
+      background: var(--back-color, #1e1408);
+    }
+    .mood-back-title {
+      font-weight: 800; font-size: 3cqh; line-height: 1.3; color: #fff;
+      text-shadow: 0 1px 4px rgba(0,0,0,.4);
+      overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-clamp: 3;
+    }
+    .mood-back-meta { font-size: 2cqh; color: rgba(255,255,255,.65); line-height: 1.4; }
+    .mood-back-stars { font-size: 2.5cqh; color: #f8d66d; letter-spacing: 2px; }
+    .mood-back-hint {
+      position: absolute; bottom: 6px; right: 8px;
+      font-size: 1.6cqh; color: rgba(255,255,255,.35); font-style: italic;
+    }
+    /* overlay & genre tag on front */
     .mood-overlay {
       position: absolute; inset: 0;
       background: linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.2) 45%, transparent 100%);
       display: flex; flex-direction: column; justify-content: flex-end;
-      padding: 10px;
-      transition: background .3s ease;
+      padding: 10px; transition: background .3s ease;
     }
-    .mood-card:hover .mood-overlay {
+    .mood-card:not(.flipped):hover .mood-overlay {
       background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.35) 55%, rgba(0,0,0,.05) 100%);
     }
-    .mood-overlay-content {
-      transform: translateY(4px);
-      transition: transform .3s ease;
-    }
-    .mood-card:hover .mood-overlay-content { transform: translateY(0); }
+    .mood-overlay-content { transform: translateY(4px); transition: transform .3s ease; }
+    .mood-card:not(.flipped):hover .mood-overlay-content { transform: translateY(0); }
     .mood-genre-tag {
       position: absolute; top: 8px; left: 8px;
       font-size: .55rem; font-weight: 800; letter-spacing: .08em;
       text-transform: uppercase; color: #fff;
       background: var(--genre-color, rgba(0,0,0,.45));
-      padding: 2px 7px; border-radius: 99px;
-      backdrop-filter: blur(4px);
+      padding: 2px 7px; border-radius: 99px; backdrop-filter: blur(4px);
       opacity: 0; transform: translateY(-4px);
       transition: opacity .25s ease, transform .25s ease;
     }
-    .mood-card:hover .mood-genre-tag { opacity: 1; transform: translateY(0); }
+    .mood-card:not(.flipped):hover .mood-genre-tag { opacity: 1; transform: translateY(0); }
     .mood-sticky {
       position: absolute; inset: 0;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: 14px; box-sizing: border-box;
-      font-size: .78rem; font-weight: 700; line-height: 1.4;
-      color: rgba(0,0,0,.65); text-align: center;
-      transition: filter .28s ease;
+      font-size: .78rem; font-weight: 700; line-height: 1.4; text-align: center;
     }
-    .mood-card:hover .mood-sticky { filter: brightness(.88); }
     .mood-sticky-pin {
       width: 12px; height: 12px; border-radius: 50%;
       position: absolute; top: -5px; left: 50%; transform: translateX(-50%);
@@ -1337,12 +1356,7 @@
       font-weight: 700; font-size: .75rem; line-height: 1.3; color: #fff;
       text-shadow: 0 1px 4px rgba(0,0,0,.6);
     }
-    .mood-meta {
-      font-size: .62rem; color: rgba(255,255,255,.75); margin-top: 3px;
-      max-height: 0; overflow: hidden; opacity: 0;
-      transition: max-height .3s ease, opacity .3s ease;
-    }
-    .mood-card:hover .mood-meta { max-height: 40px; opacity: 1; }
+    .mood-stars { font-size: .65rem; color: #f8d66d; margin-top: 3px; letter-spacing: 1px; }
     .mood-badge-row { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 5px; }
     .mood-card .badge { font-size: .58rem; padding: 1px 5px; }
     .mood-stars { font-size: .65rem; color: #f8d66d; margin-top: 3px; letter-spacing: 1px; }
@@ -2404,32 +2418,56 @@ function renderMoodboard() {
 
     const stickyBg = e.genre ? `linear-gradient(135deg, ${genreColor}cc, ${genreColor}88)` : `${stickyColor}`;
     const stickyTextColor = e.genre ? 'rgba(255,255,255,.9)' : 'rgba(0,0,0,.65)';
-    const inner = e.cover
+    const frontMedia = e.cover
       ? `<img src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'mood-sticky',style:'background:${stickyBg};color:${stickyTextColor}',innerHTML:'<div class=mood-sticky-pin></div>${e.title.replace(/'/g,"\\'").replace(/"/g,'&quot;')}'}))">`
       : `<div class="mood-sticky" style="background:${stickyBg};color:${stickyTextColor}"><div class="mood-sticky-pin"></div>${e.title}</div>`;
 
+    const backColor = genreColor + 'ee';
+    const backMeta = [e.creator, e.year].filter(Boolean).join(' · ');
+    const backStars = e.rating ? '★'.repeat(e.rating) : '';
+    const backStatus = e.status ? `<span style="font-size:.6rem;opacity:.7;text-transform:uppercase;letter-spacing:.06em">${e.status}</span>` : '';
+
     return `<div class="mood-card ${sizeClass}" data-id="${e.id}" data-rating="${e.rating||0}" style="--delay:${delay}s">
-      ${inner}
-      ${e.genre ? `<div class="mood-genre-tag" style="--genre-color:${genreColor}">${e.genre}</div>` : ''}
-      <div class="mood-overlay">
-        <div class="mood-overlay-content">
-          <div class="mood-title">${e.title}</div>
-          ${stars}
+      <div class="mood-inner">
+        <div class="mood-front">
+          ${frontMedia}
+          ${e.genre ? `<div class="mood-genre-tag" style="--genre-color:${genreColor}">${e.genre}</div>` : ''}
+          <div class="mood-overlay">
+            <div class="mood-overlay-content">
+              <div class="mood-title">${e.title}</div>
+              ${stars}
+            </div>
+          </div>
+        </div>
+        <div class="mood-back" style="--back-color:${backColor}">
+          <div class="mood-back-title">${e.title}</div>
+          ${backMeta ? `<div class="mood-back-meta">${backMeta}</div>` : ''}
+          ${backStars ? `<div class="mood-back-stars">${backStars}</div>` : ''}
+          ${backStatus}
+          <div class="mood-back-hint">tap to open →</div>
         </div>
       </div>
     </div>`;
   }).join('');
   vc.innerHTML = `<div class="moodboard">${cards}</div>`;
+
   vc.querySelectorAll('.mood-card').forEach(c => {
     c.addEventListener('click', () => openDetail(c.dataset.id));
-    c.addEventListener('mousemove', e => {
-      const r = c.getBoundingClientRect();
-      const x = (e.clientX - r.left) / r.width  - 0.5;
-      const y = (e.clientY - r.top)  / r.height - 0.5;
-      c.style.transform = `rotateY(${x * 14}deg) rotateX(${-y * 14}deg) scale(1.03)`;
+
+    c.addEventListener('mouseenter', () => {
+      c.classList.add('flipped');
+      c.style.transform = '';
     });
     c.addEventListener('mouseleave', () => {
+      c.classList.remove('flipped');
       c.style.transform = '';
+    });
+    c.addEventListener('mousemove', ev => {
+      if (c.classList.contains('flipped')) return;
+      const r = c.getBoundingClientRect();
+      const x = (ev.clientX - r.left) / r.width  - 0.5;
+      const y = (ev.clientY - r.top)  / r.height - 0.5;
+      c.style.transform = `rotateY(${x * 14}deg) rotateX(${-y * 14}deg) scale(1.03)`;
     });
   });
 }
