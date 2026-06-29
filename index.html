@@ -659,7 +659,7 @@
       text-transform: uppercase;
       letter-spacing: .04em;
     }
-    .fi, .fta, .fsel {
+    .fi, .fta {
       padding: 9px 13px;
       border-radius: var(--r-sm);
       border: 2px solid var(--border);
@@ -671,7 +671,22 @@
       transition: border-color .2s;
       width: 100%;
     }
-    .fi:focus, .fta:focus, .fsel:focus { border-color: var(--amber); }
+    .fi:focus, .fta:focus { border-color: var(--amber); }
+    .fsel {
+      padding: 9px 32px 9px 13px;
+      border-radius: var(--pill);
+      border: 2px solid var(--border);
+      background: var(--surface);
+      font-family: inherit;
+      font-size: .82rem; font-weight: 600;
+      color: var(--text);
+      outline: none;
+      box-shadow: none;
+      appearance: auto;
+      transition: border-color .2s;
+      width: 100%; cursor: pointer;
+    }
+    .fsel:focus, .fsel:hover { border-color: var(--amber); }
     .fta { resize: vertical; min-height: 78px; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
@@ -2452,7 +2467,7 @@ function renderMoodboard() {
     const stickyTextColor = e.genre ? 'rgba(255,255,255,.9)' : 'rgba(0,0,0,.65)';
     const frontMedia = e.cover
       ? `<img src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'mood-sticky',style:'background:${stickyBg};color:${stickyTextColor}',innerHTML:'<div class=mood-sticky-pin></div>${e.title.replace(/'/g,"\\'").replace(/"/g,'&quot;')}'}))">`
-      : `<div class="mood-sticky" style="background:${stickyBg};color:${stickyTextColor}"><div class="mood-sticky-pin"></div>${e.title}</div>`;
+      : `<div class="mood-sticky" style="background:${stickyBg};color:${stickyTextColor}">${e.title}</div>`;
 
     const backColor = genreColor + 'ee';
     const backMeta = [e.creator, e.year].filter(Boolean).join(' · ');
