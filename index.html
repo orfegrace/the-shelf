@@ -1184,13 +1184,68 @@
     .list-creator:hover::after { opacity: .55; }
     .list-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
 
+    /* Spine book-open animation */
+    @keyframes spine-lift {
+      0%   { transform: translateY(0) scale(1); }
+      100% { transform: translateY(-32px) scale(1.12); }
+    }
+    @keyframes book-open-bg {
+      0%   { opacity: 0; }
+      20%  { opacity: 1; }
+      80%  { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .spine-book-lifting {
+      animation: spine-lift .25s ease forwards;
+      z-index: 50 !important; position: relative;
+    }
+    .book-open-overlay {
+      position: fixed; inset: 0; z-index: 8000;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(0,0,0,.55); backdrop-filter: blur(3px);
+      animation: book-open-bg .7s ease forwards;
+      pointer-events: none;
+    }
+    .book-open-wrap {
+      display: flex; width: 240px; height: 320px;
+      transform-style: preserve-3d; perspective: 800px;
+      position: relative;
+    }
+    .book-cover-left {
+      flex: 1; height: 100%; border-radius: 4px 0 0 4px;
+      transform-origin: right center;
+      transform: rotateY(0deg);
+      transition: transform .45s cubic-bezier(.4,0,.2,1);
+      box-shadow: -4px 0 12px rgba(0,0,0,.4);
+      position: relative; overflow: hidden;
+    }
+    .book-cover-right {
+      flex: 1; height: 100%; border-radius: 0 4px 4px 0;
+      transform-origin: left center;
+      transform: rotateY(0deg);
+      transition: transform .45s cubic-bezier(.4,0,.2,1);
+      box-shadow: 4px 0 12px rgba(0,0,0,.4);
+      position: relative; overflow: hidden;
+    }
+    .book-cover-left img, .book-cover-right img {
+      position: absolute; top: 0; height: 100%; object-fit: cover;
+      width: 200%; /* show full cover across both halves */
+    }
+    .book-cover-left img  { left: 0; }
+    .book-cover-right img { right: 0; }
+    .book-cover-left .book-spine-line {
+      position: absolute; right: 0; top: 0; bottom: 0; width: 3px;
+      background: rgba(0,0,0,.35);
+    }
+    .book-open-wrap.open .book-cover-left  { transform: rotateY(-155deg); }
+    .book-open-wrap.open .book-cover-right { transform: rotateY(155deg); }
     /* Spine view */
     .spine-container {
       border-radius: var(--r);
       overflow-x: auto; overflow-y: hidden;
       background: linear-gradient(to bottom, #4e2e12 0%, #3a2009 100%);
     }
-    .spine-row { margin-bottom: 24px; display: flex; flex-direction: column; }
+    .spine-row { margin-bottom: 24px; display: flex; flex-direction: column; min-width: 100%; width: max-content; }
     .spine-shelf {
       display: flex; align-items: flex-end; gap: 2px;
       padding: 28px 24px 0; flex-wrap: nowrap;
@@ -2390,7 +2445,39 @@ function renderSpine() {
     rows.push(`<div class="spine-row"><div class="spine-shelf">${chunk}</div><div class="spine-shelf-plank"></div></div>`);
   }
   vc.innerHTML = `<div class="spine-container">${rows.join('')}</div>`;
-  vc.querySelectorAll('.spine-book').forEach(b => b.addEventListener('click', () => openDetail(b.dataset.id)));
+  vc.querySelectorAll('.spine-book').forEach(b => b.addEventListener('click', () => {
+    const entry = S.entries.find(e => e.id === b.dataset.id);
+    const bg = b.style.background || '#6a4020';
+    const coverSrc = entry?.cover || '';
+
+    // lift the book
+    b.classList.add('spine-book-lifting');
+
+    // build overlay
+    const overlay = document.createElement('div');
+    overlay.className = 'book-open-overlay';
+    const coverImg = coverSrc
+      ? `<img src="${coverSrc}" alt="" style="object-position:left top">` : '';
+    const coverImgR = coverSrc
+      ? `<img src="${coverSrc}" alt="" style="object-position:right top">` : '';
+    overlay.innerHTML = `
+      <div class="book-open-wrap">
+        <div class="book-cover-left" style="background:${bg}">${coverImg}<div class="book-spine-line"></div></div>
+        <div class="book-cover-right" style="background:${bg}">${coverImgR}</div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    // trigger open
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      overlay.querySelector('.book-open-wrap').classList.add('open');
+    }));
+
+    setTimeout(() => {
+      b.classList.remove('spine-book-lifting');
+      overlay.remove();
+      openDetail(b.dataset.id);
+    }, 680);
+  }));
 }
 
 // Moodboard view
