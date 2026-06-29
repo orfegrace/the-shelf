@@ -545,12 +545,11 @@
       flex-direction: column;
       gap: 6px;
       min-height: 110px;
-      transition: transform .2s ease, box-shadow .2s ease;
+      transition: box-shadow .2s ease;
       cursor: pointer;
     }
     .stat-card:hover {
-      transform: translateY(-4px) scale(1.02);
-      box-shadow: 0 10px 28px rgba(120,80,30,.14);
+      box-shadow: 0 6px 20px rgba(120,80,30,.14);
     }
     .stat-icon {
       display: inline-block;
@@ -1274,7 +1273,7 @@
       cursor: pointer; position: relative;
       border-radius: 10px;
       grid-column: span 1; grid-row: span 2;
-      box-shadow: 0 2px 10px rgba(0,0,0,.18);
+      box-shadow: 0 4px 16px var(--card-shadow, rgba(0,0,0,.2));
       transition: box-shadow .28s ease, transform .12s ease, z-index 0s;
       transform-style: preserve-3d; will-change: transform;
       animation: mood-in .4s ease both;
@@ -1285,7 +1284,7 @@
     .mood-card.mood-wide  { grid-column: span 2; grid-row: span 2; }
     .mood-card.mood-tall  { grid-column: span 1; grid-row: span 3; }
     .mood-card.mood-big   { grid-column: span 2; grid-row: span 3; }
-    .mood-card:hover { box-shadow: 0 10px 32px rgba(0,0,0,.35); z-index: 10; }
+    .mood-card:hover { box-shadow: 0 12px 36px var(--card-shadow, rgba(0,0,0,.3)); z-index: 10; }
     .mood-card.flipped { z-index: 20; }
     /* inner flip wrapper */
     .mood-inner {
@@ -1312,19 +1311,33 @@
       overflow: hidden; backface-visibility: hidden;
       transform: rotateY(180deg);
       display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 6px; padding: 14px; text-align: center;
+      gap: 5px; padding: 16px 14px; text-align: center;
       background: var(--back-color, #1e1408);
     }
-    .mood-back-title {
-      font-weight: 800; font-size: 3cqh; line-height: 1.3; color: #fff;
-      text-shadow: 0 1px 4px rgba(0,0,0,.4);
-      overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; line-clamp: 3;
+    .mood-back::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(145deg, rgba(255,255,255,.12) 0%, transparent 60%);
+      pointer-events: none;
     }
-    .mood-back-meta { font-size: 2cqh; color: rgba(255,255,255,.65); line-height: 1.4; }
-    .mood-back-stars { font-size: 2.5cqh; color: #f8d66d; letter-spacing: 2px; }
+    .mood-back-tag {
+      font-size: 1.8cqh; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
+      color: rgba(255,255,255,.5); margin-bottom: 2px;
+    }
+    .mood-back-title {
+      font-weight: 800; font-size: 4.5cqh; line-height: 1.2; color: #fff;
+      text-shadow: 0 1px 6px rgba(0,0,0,.3);
+      overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical; line-clamp: 3;
+    }
+    .mood-back-divider {
+      width: 32px; height: 2px; border-radius: 99px;
+      background: rgba(255,255,255,.3); margin: 3px 0;
+    }
+    .mood-back-meta { font-size: 2cqh; color: rgba(255,255,255,.7); line-height: 1.5; }
+    .mood-back-stars { font-size: 2.8cqh; color: #f8d66d; letter-spacing: 3px; margin-top: 2px; }
     .mood-back-hint {
-      position: absolute; bottom: 6px; right: 8px;
-      font-size: 1.6cqh; color: rgba(255,255,255,.35); font-style: italic;
+      position: absolute; bottom: 7px;
+      font-size: 1.6cqh; color: rgba(255,255,255,.28); letter-spacing: .04em;
     }
     /* overlay & genre tag on front */
     .mood-overlay {
@@ -1424,11 +1437,10 @@
       border-radius: var(--r);
       padding: 20px;
       box-shadow: var(--shadow);
-      transition: transform .2s ease, box-shadow .2s ease;
+      transition: box-shadow .2s ease;
     }
     .chart-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 10px 28px rgba(120,80,30,.14);
+      box-shadow: 0 6px 20px rgba(120,80,30,.14);
     }
     .chart-card-title {
       font-size: .72rem;
@@ -1470,6 +1482,13 @@
       50%       { filter: drop-shadow(0 0 7px rgba(255,215,60,.85)); transform: scale(1.1); }
     }
     .podium-slot { display: flex; flex-direction: column; align-items: center; gap: 6px; flex: 1; max-width: 150px; }
+    .podium-bar {
+      transition: transform .2s cubic-bezier(.34,1.4,.64,1), box-shadow .2s ease;
+    }
+    .podium-bar:hover {
+      transform: translateY(-6px);
+      box-shadow: inset 0 -3px 0 rgba(0,0,0,.06), 0 10px 20px rgba(0,0,0,.18) !important;
+    }
     .podium-medal { font-size: 1.8rem; line-height: 1; transition: filter .3s, transform .3s; }
     .podium-slot:hover .podium-medal { animation: medalShimmer 1.2s ease-in-out infinite; }
     .podium-name {
@@ -1477,6 +1496,7 @@
       text-align: center; line-height: 1.3;
       transition: text-shadow .4s;
       cursor: default;
+      position: relative; display: flex; align-items: center; justify-content: center;
     }
     .podium-slot:hover .podium-name {
       text-shadow: 0 0 10px rgba(200,144,48,.45), 0 0 26px rgba(200,144,48,.18);
@@ -1484,12 +1504,10 @@
     .podium-name::after {
       content: '🔍';
       font-size: .5rem;
-      margin-left: 4px;
-      opacity: 0;
-      vertical-align: middle;
-      transition: opacity .2s;
+      position: absolute; right: -14px; top: 50%; transform: translateY(-50%);
+      opacity: 0; transition: opacity .2s;
     }
-    .podium-name:hover::after { opacity: .55; }
+    .podium-name:hover::after { opacity: .9; }
     .genre-view-btns { display: flex; gap: 2px; background: var(--bg); border-radius: 6px; padding: 2px; }
     .genre-view-btn {
       width: 22px; height: 22px;
@@ -2438,7 +2456,8 @@ function renderMoodboard() {
     const backStars = e.rating ? '★'.repeat(e.rating) : '';
     const backStatus = '';
 
-    return `<div class="mood-card ${sizeClass}" data-id="${e.id}" data-rating="${e.rating||0}" style="--delay:${delay}s">
+    const shadowColor = genreColor + '55';
+    return `<div class="mood-card ${sizeClass}" data-id="${e.id}" data-rating="${e.rating||0}" style="--delay:${delay}s;--card-shadow:${shadowColor}">
       <div class="mood-inner">
         <div class="mood-front">
           ${frontMedia}
@@ -2451,11 +2470,12 @@ function renderMoodboard() {
           </div>
         </div>
         <div class="mood-back" style="--back-color:${backColor}">
+          <div class="mood-back-tag">${e.genre || (e.type === 'movie' ? 'Movie' : 'Book')}</div>
           <div class="mood-back-title">${e.title}</div>
+          <div class="mood-back-divider"></div>
           ${backMeta ? `<div class="mood-back-meta">${backMeta}</div>` : ''}
           ${backStars ? `<div class="mood-back-stars">${backStars}</div>` : ''}
-          ${backStatus}
-          <div class="mood-back-hint">tap to open →</div>
+          <div class="mood-back-hint">tap to open</div>
         </div>
       </div>
     </div>`;
@@ -2699,7 +2719,7 @@ function renderDashboard() {
     if (genreView === 'list') {
       const maxCount = gEntries[0][1];
       genreArea.innerHTML = `<div class="genre-list">${gEntries.map(([genre, count], i) => `
-        <div class="genre-row">
+        <div class="genre-row" style="cursor:pointer" onclick="showGenreList('${genre.replace(/'/g,"\\'")}')">
           <div class="genre-swatch" style="background:${palette[i % palette.length]}"></div>
           <div class="genre-name">${genre}</div>
           <div class="genre-bar-wrap">
@@ -2734,6 +2754,9 @@ function renderDashboard() {
           plugins: {
             legend: { position: 'bottom', align: 'start', labels: { font: { family: "'Plus Jakarta Sans', sans-serif", size: 11, weight: '600' }, padding: 10, boxWidth: 10, boxHeight: 10, color: document.documentElement.getAttribute('data-theme') === 'dark' ? '#f0e0c8' : '#000000' } },
             tooltip: { callbacks: { label: ctx => `  ${ctx.label}: ${ctx.parsed}` } }
+          },
+          onClick: (_, elements) => {
+            if (elements.length) showGenreList(gEntries[elements[0].index][0]);
           }
         }
       });
@@ -2766,7 +2789,7 @@ function renderDashboard() {
               <div class="podium-medal">${medals[i]}</div>
               <div class="podium-name" style="color:var(--text);cursor:pointer" onclick="window.open('https://www.google.com/search?q='+encodeURIComponent('${c[0].replace(/'/g,"\\'")}'),'_blank')">${c[0]}</div>
               <div style="font-size:.7rem;color:var(--muted);font-weight:600">${c[1]} ${c[1] === 1 ? 'entry' : 'entries'}</div>
-              <div style="width:100%;height:${heights[i]};background:${bgColors[i]};border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.06);cursor:pointer" onclick="showCreatorList('${c[0].replace(/'/g,"\\'")}')">
+              <div class="podium-bar" style="width:100%;height:${heights[i]};background:${bgColors[i]};border-radius:10px 10px 0 0;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 -3px 0 rgba(0,0,0,.06);cursor:pointer" onclick="showCreatorList('${c[0].replace(/'/g,"\\'")}')">
                 <span style="font-family:'Baloo 2',sans-serif;font-size:1.6rem;font-weight:800;color:var(--text);opacity:.18">${labels[i]}</span>
               </div>
             </div>
@@ -2873,6 +2896,16 @@ function showStatList(title, entries) {
         </div>`).join('')
     : '<div style="color:var(--muted);font-size:.9rem;padding:8px 12px">Nothing here yet.</div>';
   document.getElementById('statListOverlay').classList.add('open');
+}
+
+function showGenreList(genre) {
+  const byRecentOrAlpha = arr => [...arr].sort((a, b) => {
+    if (a.date && b.date) return a.date > b.date ? -1 : a.date < b.date ? 1 : 0;
+    if (a.date) return -1; if (b.date) return 1;
+    return a.title.localeCompare(b.title);
+  });
+  const entries = byRecentOrAlpha(S.entries.filter(e => e.genre === genre));
+  showStatList(genre, entries);
 }
 
 function showCreatorList(name) {
