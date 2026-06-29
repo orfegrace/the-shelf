@@ -1257,6 +1257,7 @@
       grid-template-columns: repeat(6, 1fr);
       grid-auto-rows: 100px;
       grid-auto-flow: dense;
+      perspective: 1000px;
       gap: 8px;
       border-radius: var(--r);
     }
@@ -1265,7 +1266,8 @@
       border-radius: 10px;
       grid-column: span 1; grid-row: span 2;
       box-shadow: 0 2px 10px rgba(0,0,0,.18);
-      transition: box-shadow .28s ease, z-index 0s;
+      transition: box-shadow .28s ease, transform .12s ease, z-index 0s;
+      transform-style: preserve-3d; will-change: transform;
       animation: mood-in .4s ease both;
       animation-delay: var(--delay, 0s);
       z-index: 1;
@@ -1276,6 +1278,14 @@
     .mood-card.mood-tall  { grid-column: span 1; grid-row: span 3; }
     .mood-card.mood-big   { grid-column: span 2; grid-row: span 3; }
     .mood-card:hover { box-shadow: 0 10px 32px rgba(0,0,0,.35); z-index: 10; }
+    .mood-card::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(115deg, transparent 25%, rgba(255,255,255,.28) 50%, transparent 75%);
+      transform: translateX(-100%) skewX(-15deg);
+      transition: transform .65s ease;
+      z-index: 6; pointer-events: none; border-radius: 10px;
+    }
+    .mood-card:hover::before { transform: translateX(200%) skewX(-15deg); }
     .mood-card img {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
       transition: transform .5s ease;
@@ -2392,27 +2402,36 @@ function renderMoodboard() {
     const stickyColor = STICKY_COLORS[i % STICKY_COLORS.length];
     const stars = e.rating ? `<div class="mood-stars">${'★'.repeat(e.rating)}</div>` : '';
 
+    const stickyBg = e.genre ? `linear-gradient(135deg, ${genreColor}cc, ${genreColor}88)` : `${stickyColor}`;
+    const stickyTextColor = e.genre ? 'rgba(255,255,255,.9)' : 'rgba(0,0,0,.65)';
     const inner = e.cover
-      ? `<img src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'mood-sticky',style:'background:${stickyColor}',innerHTML:'<div class=mood-sticky-pin></div>${e.title.replace(/'/g,"\\'").replace(/"/g,'&quot;')}'}))">`
-      : `<div class="mood-sticky" style="background:${stickyColor}"><div class="mood-sticky-pin"></div>${e.title}</div>`;
+      ? `<img src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'mood-sticky',style:'background:${stickyBg};color:${stickyTextColor}',innerHTML:'<div class=mood-sticky-pin></div>${e.title.replace(/'/g,"\\'").replace(/"/g,'&quot;')}'}))">`
+      : `<div class="mood-sticky" style="background:${stickyBg};color:${stickyTextColor}"><div class="mood-sticky-pin"></div>${e.title}</div>`;
 
-    return `<div class="mood-card ${sizeClass}" data-id="${e.id}" style="--delay:${delay}s">
+    return `<div class="mood-card ${sizeClass}" data-id="${e.id}" data-rating="${e.rating||0}" style="--delay:${delay}s">
       ${inner}
       ${e.genre ? `<div class="mood-genre-tag" style="--genre-color:${genreColor}">${e.genre}</div>` : ''}
       <div class="mood-overlay">
         <div class="mood-overlay-content">
           <div class="mood-title">${e.title}</div>
-          ${e.creator || e.year ? `<div class="mood-meta">${[e.creator, e.year].filter(Boolean).join(' · ')}</div>` : ''}
           ${stars}
-          <div class="mood-badge-row">
-            <span class="badge ${e.type === 'movie' ? 'b-movie' : 'b-book'}">${e.type === 'movie' ? 'Movie' : 'Book'}</span>
-          </div>
         </div>
       </div>
     </div>`;
   }).join('');
   vc.innerHTML = `<div class="moodboard">${cards}</div>`;
-  vc.querySelectorAll('.mood-card').forEach(c => c.addEventListener('click', () => openDetail(c.dataset.id)));
+  vc.querySelectorAll('.mood-card').forEach(c => {
+    c.addEventListener('click', () => openDetail(c.dataset.id));
+    c.addEventListener('mousemove', e => {
+      const r = c.getBoundingClientRect();
+      const x = (e.clientX - r.left) / r.width  - 0.5;
+      const y = (e.clientY - r.top)  / r.height - 0.5;
+      c.style.transform = `rotateY(${x * 14}deg) rotateX(${-y * 14}deg) scale(1.03)`;
+    });
+    c.addEventListener('mouseleave', () => {
+      c.style.transform = '';
+    });
+  });
 }
 
 // Render dashboard
