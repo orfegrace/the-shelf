@@ -2794,11 +2794,11 @@ function renderSpine() {
     if (fullShelf && lastShelf) {
       const firstBook = fullShelf.querySelector('.spine-book, [style*="flex:0"]');
       if (firstBook) {
+        // exact pixel offset so last row first book aligns with full rows
         const offset = firstBook.getBoundingClientRect().left - lastShelf.getBoundingClientRect().left;
-        // Always preserve at least 72px wall gap
-        const pl = Math.max(72, offset > 0 ? offset : 72);
-        lastShelf.style.paddingLeft  = pl + 'px';
-        lastShelf.style.paddingRight = '72px';
+        if (offset > 0) {
+          lastShelf.style.paddingLeft = offset + 'px';
+        }
       }
     }
   });
