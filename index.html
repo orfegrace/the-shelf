@@ -1190,19 +1190,19 @@
       overflow-x: auto; overflow-y: hidden;
       background: linear-gradient(to bottom, #4e2e12 0%, #3a2009 100%);
     }
+    .spine-row { margin-bottom: 24px; display: flex; flex-direction: column; }
     .spine-shelf {
       display: flex; align-items: flex-end; gap: 2px;
       padding: 28px 24px 0; flex-wrap: nowrap;
-      min-height: 220px;
+      min-height: 220px; flex: 1;
     }
     .spine-shelf-plank {
-      height: 18px;
+      height: 18px; flex-shrink: 0;
       background: linear-gradient(to bottom, #7a4e1e 0%, #5a3610 60%, #3e2208 100%);
       box-shadow: 0 4px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,200,100,.15);
     }
-    .spine-row { margin-bottom: 24px; }
     .spine-book {
-      flex: 1; min-width: 40px; max-width: 56px;
+      flex: 0 0 40px; width: 40px;
       border-radius: 2px 2px 0 0;
       cursor: pointer; position: relative;
       display: flex; align-items: center; justify-content: center;
