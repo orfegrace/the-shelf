@@ -659,8 +659,8 @@
       text-transform: uppercase;
       letter-spacing: .04em;
     }
-    .fi, .fta {
-      padding: 9px 13px;
+    .fi, .fta, .fsel {
+      padding: 9px 32px 9px 13px;
       border-radius: var(--r-sm);
       border: 2px solid var(--border);
       background: var(--surface);
@@ -672,21 +672,43 @@
       width: 100%;
     }
     .fi:focus, .fta:focus { border-color: var(--amber); }
-    .fsel {
-      padding: 9px 32px 9px 13px;
-      border-radius: var(--pill);
+    .fi[type="date"], .fi[type="number"] { padding-right: 10px; }
+    .fcsel { position: relative; width: 100%; }
+    .fcsel-trigger {
+      display: flex; align-items: center; gap: 6px;
+      padding: 9px 13px;
+      border-radius: var(--r-sm);
       border: 2px solid var(--border);
       background: var(--surface);
-      font-family: inherit;
-      font-size: .82rem; font-weight: 600;
-      color: var(--text);
-      outline: none;
-      box-shadow: none;
-      appearance: auto;
+      font-family: inherit; font-size: .92rem; font-weight: 500;
+      color: var(--text); cursor: pointer; user-select: none;
       transition: border-color .2s;
-      width: 100%; cursor: pointer;
     }
-    .fsel:focus, .fsel:hover { border-color: var(--amber); }
+    .fcsel-trigger svg { margin-left: auto; flex-shrink: 0; transition: transform .2s; color: var(--muted); }
+    .fcsel.open .fcsel-trigger svg { transform: rotate(180deg); }
+    .fcsel.open .fcsel-trigger, .fcsel-trigger:hover { border-color: var(--amber); }
+    .fcsel-menu {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: var(--r-sm); z-index: 500;
+      display: none; flex-direction: column; overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,.1);
+    }
+    .fcsel.open .fcsel-menu { display: flex; }
+    .fcsel-opt {
+      padding: 9px 14px; font-family: inherit; font-size: .88rem; font-weight: 500;
+      color: var(--text); cursor: pointer;
+      transition: background .12s, color .12s;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .fcsel-opt::before {
+      content: ''; width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+      border: 2px solid var(--border); transition: background .12s, border-color .12s;
+    }
+    .fcsel-opt:hover { background: var(--amber-lt); color: var(--amber); }
+    .fcsel-opt:hover::before { border-color: var(--amber); }
+    .fcsel-opt.selected { color: var(--amber); }
+    .fcsel-opt.selected::before { background: var(--amber); border-color: var(--amber); }
     .fta { resize: vertical; min-height: 78px; }
     .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
@@ -1854,21 +1876,24 @@
       <div class="row2">
         <div class="fg">
           <label>Genre</label>
-          <select class="fsel" id="fGenre">
-            <option value="">— Select genre —</option>
-            <option value="Adventure">Adventure</option>
-            <option value="Animation">Animation</option>
-            <option value="Comedy">Comedy</option>
-            <option value="Drama">Drama</option>
-            <option value="Fantasy">Fantasy</option>
-            <option value="Historical">Historical</option>
-            <option value="Horror">Horror</option>
-            <option value="Mystery">Mystery</option>
-            <option value="Non-Fiction">Non-Fiction</option>
-            <option value="Romance">Romance</option>
-            <option value="Sci-Fi">Sci-Fi</option>
-            <option value="Thriller">Thriller</option>
-          </select>
+          <div class="fcsel" id="fGenre" data-val="">
+            <div class="fcsel-trigger"><span>— Select genre —</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+            <div class="fcsel-menu">
+              <div class="fcsel-opt selected" data-val="">— Select genre —</div>
+              <div class="fcsel-opt" data-val="Adventure">Adventure</div>
+              <div class="fcsel-opt" data-val="Animation">Animation</div>
+              <div class="fcsel-opt" data-val="Comedy">Comedy</div>
+              <div class="fcsel-opt" data-val="Drama">Drama</div>
+              <div class="fcsel-opt" data-val="Fantasy">Fantasy</div>
+              <div class="fcsel-opt" data-val="Historical">Historical</div>
+              <div class="fcsel-opt" data-val="Horror">Horror</div>
+              <div class="fcsel-opt" data-val="Mystery">Mystery</div>
+              <div class="fcsel-opt" data-val="Non-Fiction">Non-Fiction</div>
+              <div class="fcsel-opt" data-val="Romance">Romance</div>
+              <div class="fcsel-opt" data-val="Sci-Fi">Sci-Fi</div>
+              <div class="fcsel-opt" data-val="Thriller">Thriller</div>
+            </div>
+          </div>
         </div>
         <div class="fg">
           <label id="lCreator">Director</label>
@@ -1879,12 +1904,15 @@
       <div class="row2">
         <div class="fg">
           <label>Status</label>
-          <select class="fsel" id="fStatus2">
-            <option value="done">Finished</option>
-            <option value="reading">In Progress</option>
-            <option value="dnf">Skipped</option>
-            <option value="want">Not Started</option>
-          </select>
+          <div class="fcsel" id="fStatus2" data-val="done">
+            <div class="fcsel-trigger"><span>Finished</span><svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 1l4 4 4-4"/></svg></div>
+            <div class="fcsel-menu">
+              <div class="fcsel-opt selected" data-val="done">Finished</div>
+              <div class="fcsel-opt" data-val="reading">In Progress</div>
+              <div class="fcsel-opt" data-val="dnf">Skipped</div>
+              <div class="fcsel-opt" data-val="want">Not Started</div>
+            </div>
+          </div>
         </div>
         <div class="fg">
           <label id="lDate">Date</label>
@@ -3016,8 +3044,8 @@ function openAdd(editId = null) {
   document.getElementById('fTitle').value   = e?.title   || '';
   document.getElementById('fYear').value    = e?.year    || '';
   document.getElementById('fCreator').value = e?.creator || '';
-  document.getElementById('fGenre').value   = e?.genre   || '';
-  document.getElementById('fStatus2').value = e?.status  || 'done';
+  setFcsel('fGenre',   e?.genre   || '');
+  setFcsel('fStatus2', e?.status  || 'done');
   document.getElementById('fDate').value    = e?.date    || '';
   document.getElementById('fCover').value   = e?.cover   || '';
   document.getElementById('fNotes').value   = e?.notes   || '';
@@ -3031,11 +3059,7 @@ function setType(type) {
   document.getElementById('lCreator').textContent  = type === 'movie' ? 'Director' : 'Author';
   document.getElementById('fCreator').placeholder  = type === 'movie' ? 'e.g. Denis Villeneuve' : 'e.g. Frank Herbert';
   document.getElementById('lDate').textContent     = 'Date';
-  document.getElementById('fStatus2').innerHTML =
-    '<option value="done">Finished</option>' +
-    '<option value="reading">In Progress</option>' +
-    '<option value="dnf">Skipped</option>' +
-    '<option value="want">Not Started</option>';
+  setFcsel('fStatus2', 'done');
 }
 
 function setRating(val) {
@@ -3061,8 +3085,8 @@ function saveEntry() {
     title,
     year:    document.getElementById('fYear').value    ? +document.getElementById('fYear').value : null,
     creator: document.getElementById('fCreator').value.trim() || null,
-    genre:   document.getElementById('fGenre').value.trim()   || null,
-    status:  document.getElementById('fStatus2').value,
+    genre:   (document.getElementById('fGenre').dataset.val  || '').trim() || null,
+    status:  document.getElementById('fStatus2').dataset.val || 'done',
     date:    document.getElementById('fDate').value   || null,
     rating:  S.rating || null,
     cover:   document.getElementById('fCover').value.trim()   || null,
@@ -3117,6 +3141,32 @@ document.addEventListener('click', e => {
     document.getElementById('viewToggle').setAttribute('aria-expanded', 'false');
   }
 });
+
+// Form custom selects (fcsel)
+function setFcsel(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.dataset.val = val;
+  const opt = el.querySelector(`.fcsel-opt[data-val="${val}"]`);
+  el.querySelector('.fcsel-trigger span').textContent = opt ? opt.textContent : val;
+  el.querySelectorAll('.fcsel-opt').forEach(o => o.classList.toggle('selected', o === opt));
+  el.classList.remove('open');
+}
+document.querySelectorAll('.fcsel').forEach(el => {
+  el.querySelector('.fcsel-trigger').addEventListener('click', e => {
+    e.stopPropagation();
+    const wasOpen = el.classList.contains('open');
+    document.querySelectorAll('.fcsel.open').forEach(c => c.classList.remove('open'));
+    if (!wasOpen) el.classList.add('open');
+  });
+  el.querySelectorAll('.fcsel-opt').forEach(opt => {
+    opt.addEventListener('click', e => {
+      e.stopPropagation();
+      setFcsel(el.id, opt.dataset.val);
+    });
+  });
+});
+document.addEventListener('click', () => document.querySelectorAll('.fcsel.open').forEach(c => c.classList.remove('open')));
 
 // Type buttons
 document.querySelectorAll('.type-btn').forEach(b => b.addEventListener('click', () => setType(b.dataset.type)));
