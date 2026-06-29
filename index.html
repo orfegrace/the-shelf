@@ -1235,14 +1235,15 @@
       overflow-x: auto; overflow-y: hidden;
       background: linear-gradient(to bottom, #4e2e12 0%, #3a2009 100%);
     }
-    .spine-row { margin-bottom: 24px; display: flex; flex-direction: column; width: 100%; }
+    .spine-row { margin-bottom: 24px; display: flex; justify-content: center; width: 100%; }
+    .spine-row-inner { display: flex; flex-direction: column; }
     .spine-shelf {
-      display: flex; align-items: flex-end; justify-content: center; gap: 2px;
-      padding: 28px 24px 0; flex-wrap: nowrap;
-      min-height: 220px; flex: 1;
+      display: flex; align-items: flex-end; gap: 2px;
+      padding: 28px 0 0; flex-wrap: nowrap;
+      min-height: 220px;
     }
     .spine-shelf-plank {
-      height: 18px; flex-shrink: 0;
+      height: 18px;
       background: linear-gradient(to bottom, #7a4e1e 0%, #5a3610 60%, #3e2208 100%);
       box-shadow: 0 4px 12px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,200,100,.15);
     }
@@ -1344,6 +1345,10 @@
       transition: transform .5s ease;
     }
     .mood-card:not(.flipped):hover .mood-front img { transform: scale(1.08); }
+    .mood-front::after {
+      content: ''; position: absolute; inset: 0; border-radius: 10px;
+      background: rgba(255,252,248,.15); pointer-events: none; z-index: 1;
+    }
     /* back face */
     .mood-back {
       position: absolute; inset: 0; border-radius: 10px;
@@ -2462,7 +2467,7 @@ function renderSpine() {
   const rows = [];
   for (let i = 0; i < bookEls.length; i += chunkSize) {
     const chunk = bookEls.slice(i, i + chunkSize).join('');
-    rows.push(`<div class="spine-row"><div class="spine-shelf">${chunk}</div><div class="spine-shelf-plank"></div></div>`);
+    rows.push(`<div class="spine-row"><div class="spine-row-inner"><div class="spine-shelf">${chunk}</div><div class="spine-shelf-plank"></div></div></div>`);
   }
   vc.innerHTML = `<div class="spine-container">${rows.join('')}</div>`;
   vc.querySelectorAll('.spine-book').forEach(b => b.addEventListener('click', () => openDetail(b.dataset.id)));
