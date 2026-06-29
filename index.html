@@ -73,6 +73,8 @@
     }
     [data-theme="dark"] #mvbBookNum { color: var(--sage) !important; }
     [data-theme="dark"] #mvbBarBook { background: var(--sage) !important; }
+    [data-theme="dark"] .spine-container { background: linear-gradient(to bottom, #1a1008 0%, #0e0804 100%); }
+    [data-theme="dark"] .spine-shelf-plank { background: linear-gradient(to bottom, #2a1a08 0%, #1a0e04 60%, #0e0802 100%); }
     #themeToggle {
       position: fixed; bottom: 20px; right: 20px; z-index: 9999;
       width: 42px; height: 42px; border-radius: 50%; border: none;
@@ -2464,7 +2466,7 @@ function renderSpine() {
       <div class="spine-tooltip">${e.title}${e.creator ? ' · ' + e.creator : ''}${e.rating ? ' ' + '★'.repeat(e.rating) : ''}</div>
     </div>`;
   });
-  const chunkSize = 25;
+  const chunkSize = 27;
   const chunks = [];
   for (let i = 0; i < bookEls.length; i += chunkSize) chunks.push(bookEls.slice(i, i + chunkSize).join(''));
   const rows = chunks.map((chunk, i) => {
