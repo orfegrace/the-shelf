@@ -1150,10 +1150,19 @@
       padding: 10px 16px;
       border-bottom: 1px solid var(--border);
       cursor: pointer;
-      transition: background .12s;
+      transition: background .18s, padding-left .3s cubic-bezier(.34,1.2,.64,1);
+      position: relative; overflow: hidden;
     }
     .list-item:last-child { border-bottom: none; }
-    .list-item:hover { background: var(--amber-lt); }
+    .list-item:hover { background: var(--amber-lt); padding-left: 130px; }
+    .list-peek {
+      position: absolute; left: 0; top: 0; bottom: 0; width: 120px;
+      object-fit: cover;
+      transform: translateX(-100%);
+      transition: transform .3s cubic-bezier(.34,1.2,.64,1);
+      pointer-events: none;
+    }
+    .list-item:hover .list-peek { transform: translateX(0); }
     .list-thumb {
       width: 32px; height: 48px;
       border-radius: 4px;
@@ -2337,7 +2346,9 @@ function renderList() {
     const thumb = e.cover
       ? `<img class="list-thumb" src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'${ph}',textContent:'${label}'}))"/>`
       : `<div class="${ph}">${label}</div>`;
+    const peek = e.cover ? `<img class="list-peek" src="${e.cover}" alt="">` : '';
     return `<div class="list-item" data-id="${e.id}">
+      ${peek}
       ${thumb}
       <div class="list-info">
         <div class="list-title">${e.title}</div>
