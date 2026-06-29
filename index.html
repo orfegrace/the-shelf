@@ -2566,7 +2566,9 @@ function renderSpine() {
       : `<div class="spine-label spine-rotated">${e.title}</div>`;
     const tooltipText = e.title + (e.rating ? ' · '+'★'.repeat(e.rating) : '');
     let tabs = '';
+    let grime = '';
     if (messy) {
+      // index tabs
       const sv = seed('tab'+i);
       if (sv % 10 < 7) {
         const top = 18 + (sv % Math.max(1, h - 50));
@@ -2577,9 +2579,39 @@ function renderSpine() {
           tabs += `<div class="spine-tab" style="background:${TAB_COLORS[sv2 % TAB_COLORS.length]};top:${top2}px"></div>`;
         }
       }
+
+      // yellowing/aging: ~35% of books get sepia tint
+      const fv = seed('fade'+i);
+      if (fv % 10 < 4) {
+        const fop = (.13 + (fv % 5) * .04).toFixed(2);
+        grime += `<div style="position:absolute;inset:0;background:rgba(200,160,80,${fop});mix-blend-mode:multiply;pointer-events:none;border-radius:inherit"></div>`;
+      }
+
+      // spine edge wear: lighter worn strip on pulling edge
+      const wv = seed('wear'+i);
+      if (wv % 3 < 2) {
+        const wop = (.08 + (wv%4)*.04).toFixed(2);
+        grime += `<div style="position:absolute;top:0;bottom:0;right:0;width:4px;background:linear-gradient(to left,rgba(255,220,160,${wop}),transparent);pointer-events:none;border-radius:inherit"></div>`;
+      }
+
+      // fingerprint/hand smudge: ~40% of books, mid-spine
+      const fp = seed('fing'+i);
+      if (fp % 10 < 4) {
+        const fy = 30 + (fp % Math.max(1, h - 60));
+        const fw = 18 + (fp % 14);
+        const fh = 8 + (fp % 8);
+        const frot = -20 + (fp % 40);
+        const fop2 = (.06 + (fp%4)*.03).toFixed(2);
+        grime += `<div style="position:absolute;left:50%;top:${fy}px;width:${fw}px;height:${fh}px;background:rgba(30,15,5,${fop2});border-radius:50%;transform:translateX(-50%) rotate(${frot}deg);filter:blur(2px);pointer-events:none"></div>`;
+      }
+
+      // dust accumulation at bottom of book
+      const dv = seed('dust'+i);
+      const dop = (.06 + (dv%3)*.03).toFixed(2);
+      grime += `<div style="position:absolute;bottom:0;left:0;right:0;height:6px;background:linear-gradient(to top,rgba(140,110,60,${dop}),transparent);pointer-events:none"></div>`;
     }
     return { h, html: `<div class="spine-book${extraClass}" data-id="${e.id}" data-tip="${tooltipText.replace(/"/g,'&quot;')}" style="height:${h}px;background:${bg};${extraStyle}">\
-<div class="spine-book-inner">${img}</div>${tabs}${label}</div>` };
+<div class="spine-book-inner">${img}</div>${tabs}${grime}${label}</div>` };
   };
 
   // Helper: horizontal flat-book label (title reads left-to-right)
@@ -2701,14 +2733,31 @@ function renderSpine() {
         extras += `<div style="position:absolute;bottom:4px;left:${dx}%;width:${dw}px;height:8px;border-radius:50%;background:rgba(180,140,80,${dop});pointer-events:none;filter:blur(3px)"></div>`;
       }
 
-      // ring stains (mug marks): occasional circle on plank
-      if (rs % 5 === 0) {
-        const cs = seed('ring'+rowIdx);
-        const cx = 10 + (cs % 75);
-        const csz = 18 + (cs % 14);
-        const cop = (.06 + (cs%3)*.02).toFixed(3);
-        extras += `<div style="position:absolute;bottom:6px;left:${cx}%;width:${csz}px;height:${csz}px;border-radius:50%;border:2px solid rgba(160,110,50,${cop});pointer-events:none"></div>`;
+      // ring stains: 1–3 mug rings per row, with inner ghost
+      const ringCount = 1 + (rs % 3);
+      for (let r = 0; r < ringCount; r++) {
+        const cs  = seed('ring'+rowIdx+r*7);
+        const cx  = 6 + (cs % 80);
+        const csz = 14 + (cs % 18);
+        const cop = (.07 + (cs%5)*.025).toFixed(3);
+        extras += `<div style="position:absolute;bottom:3px;left:${cx}%;width:${csz}px;height:${csz}px;border-radius:50%;border:2px solid rgba(130,85,30,${cop});background:rgba(150,100,40,${(+cop*.3).toFixed(3)});pointer-events:none"></div>`;
+        // faded ghost ring slightly offset (double-cup set down twice)
+        if (cs % 3 === 0) {
+          extras += `<div style="position:absolute;bottom:5px;left:calc(${cx}% + 5px);width:${csz}px;height:${csz}px;border-radius:50%;border:1px solid rgba(130,85,30,${(+cop*.4).toFixed(3)});pointer-events:none"></div>`;
+        }
       }
+      // scuff/scratch streaks on plank surface
+      const scuffCount = 2 + (seed('scf'+rowIdx) % 3);
+      for (let s = 0; s < scuffCount; s++) {
+        const sc  = seed('scuff'+rowIdx+s*11);
+        const sx  = 3 + (sc % 85);
+        const sw  = 15 + (sc % 55);
+        const sop = (.03 + (sc%4)*.02).toFixed(3);
+        const srot = -3 + (sc % 6);
+        extras += `<div style="position:absolute;bottom:${5+(sc%10)}px;left:${sx}%;width:${sw}px;height:1px;background:rgba(80,50,15,${sop});transform:rotate(${srot}deg);pointer-events:none"></div>`;
+      }
+      // dark grime line where books meet the plank
+      extras += `<div style="position:absolute;bottom:18px;left:0;right:0;height:3px;background:linear-gradient(to right,transparent 3%,rgba(20,10,0,.13) 15%,rgba(20,10,0,.18) 50%,rgba(20,10,0,.13) 85%,transparent 97%);pointer-events:none"></div>`;
 
       // pencil on designated rows
       if (rowIdx === pencilRow0 || rowIdx === pencilRow1) {
