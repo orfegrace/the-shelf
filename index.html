@@ -1184,7 +1184,7 @@
     /* Spine view */
     .spine-container {
       border-radius: var(--r);
-      overflow: hidden;
+      overflow-x: auto; overflow-y: hidden;
       background: linear-gradient(to bottom, #4e2e12 0%, #3a2009 100%);
     }
     .spine-shelf {
@@ -1199,14 +1199,13 @@
     }
     .spine-row { margin-bottom: 24px; }
     .spine-book {
-      flex: 1; min-width: 40px; max-width: 52px;
+      flex: 0 0 44px; width: 44px;
       border-radius: 2px 2px 0 0;
       cursor: pointer; position: relative;
       display: flex; align-items: center; justify-content: center;
       transition: transform .2s ease;
       overflow: hidden;
     }
-    .spine-shelf-last .spine-book { flex: 0 0 44px; }
     .spine-book:hover { transform: translateY(-14px); z-index: 2; }
     .spine-book::after {
       content: ''; position: absolute; top: 0; right: 0;
@@ -2302,8 +2301,7 @@ function renderSpine() {
   const rows = [];
   for (let i = 0; i < bookEls.length; i += chunkSize) {
     const chunk = bookEls.slice(i, i + chunkSize).join('');
-    const isLast = i + chunkSize >= bookEls.length;
-    rows.push(`<div class="spine-row"><div class="spine-shelf${isLast ? ' spine-shelf-last' : ''}">${chunk}</div><div class="spine-shelf-plank"></div></div>`);
+    rows.push(`<div class="spine-row"><div class="spine-shelf">${chunk}</div><div class="spine-shelf-plank"></div></div>`);
   }
   vc.innerHTML = `<div class="spine-container">${rows.join('')}</div>`;
   vc.querySelectorAll('.spine-book').forEach(b => b.addEventListener('click', () => openDetail(b.dataset.id)));
