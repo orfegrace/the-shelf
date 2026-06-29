@@ -1188,7 +1188,7 @@
       background: linear-gradient(to bottom, #4e2e12 0%, #3a2009 100%);
     }
     .spine-shelf {
-      display: flex; align-items: flex-end; gap: 0;
+      display: flex; align-items: flex-end; gap: 2px;
       padding: 28px 20px 0; flex-wrap: nowrap;
       min-height: 220px; width: 100%; box-sizing: border-box;
     }
@@ -1199,20 +1199,21 @@
     }
     .spine-row { margin-bottom: 24px; }
     .spine-book {
-      flex: 0 0 44px; width: 44px;
+      flex: 1; min-width: 40px; max-width: 52px;
       border-radius: 2px 2px 0 0;
       cursor: pointer; position: relative;
       display: flex; align-items: center; justify-content: center;
       transition: transform .2s ease;
       overflow: hidden;
     }
+    .spine-shelf-last .spine-book { flex: 0 0 44px; }
     .spine-book:hover { transform: translateY(-14px); z-index: 2; }
     .spine-book::after {
       content: ''; position: absolute; top: 0; right: 0;
       width: 4px; height: 100%;
       background: rgba(0,0,0,.08);
     }
-    .spine-book img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .65; }
+    .spine-book img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: .55; }
     .spine-label {
       font-size: .88rem; font-weight: 700; color: rgba(255,255,255,.88);
       position: relative; z-index: 1;
@@ -2301,7 +2302,8 @@ function renderSpine() {
   const rows = [];
   for (let i = 0; i < bookEls.length; i += chunkSize) {
     const chunk = bookEls.slice(i, i + chunkSize).join('');
-    rows.push(`<div class="spine-row"><div class="spine-shelf">${chunk}</div><div class="spine-shelf-plank"></div></div>`);
+    const isLast = i + chunkSize >= bookEls.length;
+    rows.push(`<div class="spine-row"><div class="spine-shelf${isLast ? ' spine-shelf-last' : ''}">${chunk}</div><div class="spine-shelf-plank"></div></div>`);
   }
   vc.innerHTML = `<div class="spine-container">${rows.join('')}</div>`;
   vc.querySelectorAll('.spine-book').forEach(b => b.addEventListener('click', () => openDetail(b.dataset.id)));
