@@ -2492,11 +2492,13 @@ function renderMoodboard() {
   vc.querySelectorAll('.mood-card').forEach(c => {
     c.addEventListener('click', () => openDetail(c.dataset.id));
 
+    let flipTimer;
     c.addEventListener('mouseenter', () => {
-      c.classList.add('flipped');
       c.style.transform = '';
+      flipTimer = setTimeout(() => c.classList.add('flipped'), 420);
     });
     c.addEventListener('mouseleave', () => {
+      clearTimeout(flipTimer);
       c.classList.remove('flipped');
       c.style.transform = '';
     });
