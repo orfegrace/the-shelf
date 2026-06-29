@@ -82,7 +82,9 @@ index.html
 │       │   ├── Rating
 │       │   ├── Genre
 │       │   └── Year Added
-│       └── List View
+        ├── List View
+│       ├── Spine View
+│       └── Mood Board View
 │
 ├── Stats Page
 │   └── Displays collection-related statistics
