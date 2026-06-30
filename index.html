@@ -1354,7 +1354,6 @@
       grid-template-columns: repeat(6, 1fr);
       grid-auto-rows: 100px;
       grid-auto-flow: dense;
-      perspective: 1000px;
       gap: 8px;
       border-radius: var(--r);
       position: relative; z-index: 1;
@@ -1366,7 +1365,6 @@
       grid-column: span 1; grid-row: span 2;
       box-shadow: 0 4px 16px var(--card-shadow, rgba(0,0,0,.2));
       transition: box-shadow .28s ease, transform .12s ease, z-index 0s;
-      transform-style: preserve-3d; will-change: transform;
       animation: mood-in .4s ease both;
       animation-delay: var(--delay, 0s);
       z-index: 1;
@@ -1376,76 +1374,36 @@
     .mood-card.mood-tall  { grid-column: span 1; grid-row: span 3; }
     .mood-card.mood-big   { grid-column: span 2; grid-row: span 3; }
     .mood-card:hover { box-shadow: 0 12px 36px var(--card-shadow, rgba(0,0,0,.3)); z-index: 10; }
-    .mood-card.flipped { z-index: 20; }
-    /* inner flip wrapper */
+    /* front face */
     .mood-inner {
       position: absolute; inset: 0; border-radius: 10px;
-      transform-style: preserve-3d;
-      transition: transform .55s cubic-bezier(.4,0,.2,1);
       container-type: size;
     }
-    .mood-card.flipped .mood-inner { transform: rotateY(180deg); }
-    /* front face */
     .mood-front {
       position: absolute; inset: 0; border-radius: 10px;
-      overflow: hidden; backface-visibility: hidden;
-      background: var(--surface);
+      overflow: hidden; background: var(--surface);
     }
     .mood-front img {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
       transition: transform .5s ease;
     }
-    .mood-card:not(.flipped):hover .mood-front img { transform: scale(1.08); }
+    .mood-card:hover .mood-front img { transform: scale(1.08); }
     .mood-front::after {
       content: ''; position: absolute; inset: 0; border-radius: 10px;
       background: rgba(255,252,248,.07); pointer-events: none; z-index: 1;
     }
-    /* back face */
-    .mood-back {
-      position: absolute; inset: 0; border-radius: 10px;
-      overflow: hidden; backface-visibility: hidden;
-      transform: rotateY(180deg);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      gap: 5px; padding: 16px 14px; text-align: center;
-      background: var(--back-color, #1e1408);
-    }
-    .mood-back::before {
-      content: ''; position: absolute; inset: 0;
-      background: linear-gradient(145deg, rgba(255,255,255,.12) 0%, transparent 60%);
-      pointer-events: none;
-    }
-    .mood-back-tag {
-      font-size: 1.8cqh; font-weight: 800; letter-spacing: .1em; text-transform: uppercase;
-      color: rgba(255,255,255,.5); margin-bottom: 2px;
-    }
-    .mood-back-title {
-      font-weight: 800; font-size: 4.5cqh; line-height: 1.2; color: #fff;
-      text-shadow: 0 1px 6px rgba(0,0,0,.3);
-      overflow: hidden; display: -webkit-box; -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical; line-clamp: 3;
-    }
-    .mood-back-divider {
-      width: 32px; height: 2px; border-radius: 99px;
-      background: rgba(255,255,255,.3); margin: 3px 0;
-    }
-    .mood-back-meta { font-size: 2cqh; color: rgba(255,255,255,.7); line-height: 1.5; }
-    .mood-back-stars { font-size: 2.8cqh; color: #f8d66d; letter-spacing: 3px; margin-top: 2px; }
-    .mood-back-hint {
-      position: absolute; bottom: 7px;
-      font-size: 1.6cqh; color: rgba(255,255,255,.28); letter-spacing: .04em;
-    }
-    /* overlay & genre tag on front */
+    /* overlay & genre tag */
     .mood-overlay {
       position: absolute; inset: 0;
       background: linear-gradient(to top, rgba(0,0,0,.82) 0%, rgba(0,0,0,.2) 45%, transparent 100%);
       display: flex; flex-direction: column; justify-content: flex-end;
       padding: 10px; transition: background .3s ease;
     }
-    .mood-card:not(.flipped):hover .mood-overlay {
+    .mood-card:hover .mood-overlay {
       background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.35) 55%, rgba(0,0,0,.05) 100%);
     }
     .mood-overlay-content { transform: translateY(4px); transition: transform .3s ease; }
-    .mood-card:not(.flipped):hover .mood-overlay-content { transform: translateY(0); }
+    .mood-card:hover .mood-overlay-content { transform: translateY(0); }
     .mood-genre-tag {
       position: absolute; top: 8px; left: 8px;
       font-size: .55rem; font-weight: 800; letter-spacing: .08em;
@@ -1455,7 +1413,7 @@
       opacity: 0; transform: translateY(-4px);
       transition: opacity .25s ease, transform .25s ease;
     }
-    .mood-card:not(.flipped):hover .mood-genre-tag { opacity: 1; transform: translateY(0); }
+    .mood-card:hover .mood-genre-tag { opacity: 1; transform: translateY(0); }
     .mood-sticky {
       position: absolute; inset: 0;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -2840,11 +2798,6 @@ function renderMoodboard() {
       ? `<img src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'mood-sticky',style:'background:${stickyBg};color:${stickyTextColor}',innerHTML:'<div class=mood-sticky-pin></div>${e.title.replace(/'/g,"\\'").replace(/"/g,'&quot;')}'}))">`
       : `<div class="mood-sticky" style="background:${stickyBg};color:${stickyTextColor}">${e.title}</div>`;
 
-    const backColor = genreColor + 'ee';
-    const backMeta = [e.creator, e.year].filter(Boolean).join(' · ');
-    const backStars = e.rating ? '★'.repeat(e.rating) : '';
-    const backStatus = '';
-
     const shadowColor = genreColor + '55';
     return `<div class="mood-card ${sizeClass}" data-id="${e.id}" data-rating="${e.rating||0}" style="--delay:${delay}s;--card-shadow:${shadowColor}">
       <div class="mood-inner">
@@ -2858,14 +2811,6 @@ function renderMoodboard() {
             </div>
           </div>
         </div>
-        <div class="mood-back" style="--back-color:${backColor}">
-          <div class="mood-back-tag">${e.genre || (e.type === 'movie' ? 'Movie' : 'Book')}</div>
-          <div class="mood-back-title">${e.title}</div>
-          <div class="mood-back-divider"></div>
-          ${backMeta ? `<div class="mood-back-meta">${backMeta}</div>` : ''}
-          ${backStars ? `<div class="mood-back-stars">${backStars}</div>` : ''}
-          <div class="mood-back-hint">tap to open</div>
-        </div>
       </div>
     </div>`;
   }).join('');
@@ -2877,24 +2822,6 @@ function renderMoodboard() {
 
   vc.querySelectorAll('.mood-card').forEach(c => {
     c.addEventListener('click', () => openDetail(c.dataset.id));
-
-    let flipTimer;
-    c.addEventListener('mouseenter', () => {
-      c.style.transform = '';
-      flipTimer = setTimeout(() => c.classList.add('flipped'), 420);
-    });
-    c.addEventListener('mouseleave', () => {
-      clearTimeout(flipTimer);
-      c.classList.remove('flipped');
-      c.style.transform = '';
-    });
-    c.addEventListener('mousemove', ev => {
-      if (c.classList.contains('flipped')) return;
-      const r = c.getBoundingClientRect();
-      const x = (ev.clientX - r.left) / r.width  - 0.5;
-      const y = (ev.clientY - r.top)  / r.height - 0.5;
-      c.style.transform = `rotateY(${x * 14}deg) rotateX(${-y * 14}deg) scale(1.03)`;
-    });
   });
 }
 
