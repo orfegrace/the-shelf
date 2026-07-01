@@ -1409,11 +1409,10 @@
       font-size: .55rem; font-weight: 800; letter-spacing: .08em;
       text-transform: uppercase; color: #fff;
       background: var(--genre-color, rgba(0,0,0,.45));
-      padding: 2px 7px; border-radius: 99px; backdrop-filter: blur(4px);
-      opacity: 0; transform: translateY(-4px);
-      transition: opacity .25s ease, transform .25s ease;
+      padding: 2px 7px; border-radius: 99px;
+      opacity: .92; transform: translateY(0);
+      box-shadow: 0 1px 6px rgba(0,0,0,.25);
     }
-    .mood-card:hover .mood-genre-tag { opacity: 1; transform: translateY(0); }
     .mood-sticky {
       position: absolute; inset: 0;
       display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -2776,12 +2775,12 @@ function renderMoodboard() {
   if (!list.length) { vc.innerHTML = emptyHTML(); return; }
 
   const GENRE_COLORS = {
-    'fiction':'#b56830','fantasy':'#5e8a5a','romance':'#c06070','thriller':'#3a4a6a',
-    'horror':'#7a3030','sci-fi':'#3a6a8a','science':'#3a7a6a','history':'#7a6030',
-    'biography':'#5a6a4a','mystery':'#5a4a7a','comedy':'#b87820','drama':'#7a4040',
-    'action':'#8a4020','documentary':'#4a6a5a','non-fiction':'#6a5a40',
+    'fiction':'#e07a30','fantasy':'#4caf72','romance':'#e8527a','thriller':'#4a6bbf',
+    'horror':'#c0392b','sci-fi':'#2196c8','science':'#00b894','history':'#d4a017',
+    'biography':'#78a055','mystery':'#7c5cbf','comedy':'#f39c12','drama':'#e74c6a',
+    'action':'#e8440c','documentary':'#27ae8a','non-fiction':'#8e7040',
   };
-  const STICKY_COLORS = ['#fef08a','#fda4af','#86efac','#93c5fd','#f9a8d4','#fdba74','#a5f3fc'];
+  const STICKY_COLORS = ['#fde047','#fb7185','#34d399','#60a5fa','#f472b6','#fb923c','#22d3ee','#a78bfa','#4ade80','#f87171'];
   const sizeByRating = r => ({ 5:'mood-big', 4:'mood-tall', 3:'mood-wide', 2:'', 1:'mood-small' }[r] || '');
 
   const cards = list.map((e, i) => {
@@ -2798,8 +2797,8 @@ function renderMoodboard() {
       ? `<img src="${e.cover}" alt="" onerror="this.replaceWith(Object.assign(document.createElement('div'),{className:'mood-sticky',style:'background:${stickyBg};color:${stickyTextColor}',innerHTML:'<div class=mood-sticky-pin></div>${e.title.replace(/'/g,"\\'").replace(/"/g,'&quot;')}'}))">`
       : `<div class="mood-sticky" style="background:${stickyBg};color:${stickyTextColor}">${e.title}</div>`;
 
-    const shadowColor = genreColor + '55';
-    return `<div class="mood-card ${sizeClass}" data-id="${e.id}" data-rating="${e.rating||0}" style="--delay:${delay}s;--card-shadow:${shadowColor}">
+    const shadowColor = genreColor + '66';
+    return `<div class="mood-card ${sizeClass}" data-id="${e.id}" data-rating="${e.rating||0}" style="--delay:${delay}s;--card-shadow:${shadowColor};--accent:${genreColor};box-shadow:0 4px 16px ${shadowColor},0 0 0 2px ${genreColor}33">
       <div class="mood-inner">
         <div class="mood-front">
           ${frontMedia}
@@ -2810,6 +2809,7 @@ function renderMoodboard() {
               ${stars}
             </div>
           </div>
+          <div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:${genreColor};opacity:.85;pointer-events:none"></div>
         </div>
       </div>
     </div>`;
