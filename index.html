@@ -3276,7 +3276,7 @@ function openDetail(id) {
       ${e.year    ? `<div class="det-meta">Year: <strong>${e.year}</strong></div>` : ''}
       ${e.date    ? `<div class="det-meta">Date: <strong>${fmtDate(e.date)}</strong></div>` : ''}
       ${e.rating  ? starsHTML(e.rating, '1.35rem') : ''}
-      ${e.notes   ? `<div class="det-notes">${e.notes}</div>` : ''}
+      ${e.notes   ? `<div class="det-notes" style="white-space:pre-wrap">${e.notes.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>` : ''}
     </div>
   `;
   document.getElementById('detOverlay').classList.add('open');
